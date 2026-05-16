@@ -223,15 +223,3 @@ export default function Proxies() {
     </div>
   )
 }
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-        </Card>
-      </div>
-    </div>
-  )
-}
