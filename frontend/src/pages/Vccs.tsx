@@ -3,12 +3,19 @@ import { apiFetch } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Plus, Trash2, CreditCard, CheckCircle, XCircle, Clock, Search, Zap } from 'lucide-react'
 
 export default function Vccs() {
   const [vccs, setVccs] = useState<any[]>([])
   const [form, setForm] = useState({ number: '', exp_month: '', exp_year: '', cvc: '', billing_country: 'US', label: '' })
   const [bulkText, setBulkText] = useState('')
+  const [binInput, setBinInput] = useState('')
+  const [binCount, setBinCount] = useState('10')
+  const [binCountry, setBinCountry] = useState('US')
+  const [binSave, setBinSave] = useState(true)
+  const [binResult, setBinResult] = useState<any>(null)
+  const [binLookup, setBinLookup] = useState<any>(null)
+  const [generating, setGenerating] = useState(false)
 
   const load = () => apiFetch('/vccs').then((d: any) => setVccs(d.vccs || []))
 
@@ -50,6 +57,40 @@ export default function Vccs() {
   const del = async (id: number) => {
     await apiFetch(`/vccs/${id}`, { method: 'DELETE' })
     load()
+  }
+
+  const genCards = async () => {
+    if (!binInput.trim()) return
+    setGenerating(true)
+    try {
+      const res = await apiFetch('/bin/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          bin: binInput.trim(),
+          count: parseInt(binCount) || 10,
+          save_to_pool: binSave,
+          billing_country: binCountry,
+        }),
+      })
+      setBinResult(res)
+      if (binSave) load()
+    } catch (e: any) {
+      setBinResult({ ok: false, error: e.message })
+    }
+    setGenerating(false)
+  }
+
+  const lookupBin = async () => {
+    if (!binInput.trim()) return
+    try {
+      const res = await apiFetch('/bin/lookup', {
+        method: 'POST',
+        body: JSON.stringify({ bin: binInput.trim() }),
+      })
+      setBinLookup(res.data)
+    } catch (e: any) {
+      setBinLookup({ error: e.message })
+    }
   }
 
   const statusIcon = (status: string) => {
@@ -94,33 +135,72 @@ export default function Vccs() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,400px)_minmax(0,1fr)]">
-        <Card className="bg-[var(--bg-pane)]/60">
-          <div className="space-y-4">
-            <div>
-              <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Add VCC</div>
-              <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Single card or bulk import</div>
-            </div>
-            <div className="space-y-2">
-              <input className="input w-full" placeholder="Card number" value={form.number} onChange={e => setForm({ ...form, number: e.target.value })} />
-              <div className="grid grid-cols-3 gap-2">
-                <input className="input" placeholder="MM" value={form.exp_month} onChange={e => setForm({ ...form, exp_month: e.target.value })} />
-                <input className="input" placeholder="YYYY" value={form.exp_year} onChange={e => setForm({ ...form, exp_year: e.target.value })} />
-                <input className="input" placeholder="CVC" value={form.cvc} onChange={e => setForm({ ...form, cvc: e.target.value })} />
+        <div className="space-y-4">
+          <Card className="bg-[var(--bg-pane)]/60">
+            <div className="space-y-4">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">BIN Generator</div>
+                <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Generate cards from BIN prefix</div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <input className="input" placeholder="Country (US)" value={form.billing_country} onChange={e => setForm({ ...form, billing_country: e.target.value })} />
-                <input className="input" placeholder="Label (optional)" value={form.label} onChange={e => setForm({ ...form, label: e.target.value })} />
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input className="input flex-1" placeholder="BIN (6-8 digits)" value={binInput} onChange={e => setBinInput(e.target.value)} />
+                  <Button variant="outline" size="sm" onClick={lookupBin}><Search className="h-4 w-4" /></Button>
+                </div>
+                {binLookup && !binLookup.error && (
+                  <div className="text-xs text-[var(--text-muted)] bg-[var(--chip-bg)] p-2 rounded">
+                    {binLookup.brand} | {binLookup.type} | {binLookup.country_name || binLookup.country} | {binLookup.bank || '-'}
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-2">
+                  <input className="input" placeholder="Count" value={binCount} onChange={e => setBinCount(e.target.value)} />
+                  <input className="input" placeholder="Country" value={binCountry} onChange={e => setBinCountry(e.target.value)} />
+                  <label className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                    <input type="checkbox" checked={binSave} onChange={e => setBinSave(e.target.checked)} />
+                    Save to pool
+                  </label>
+                </div>
+                <Button size="sm" onClick={genCards} disabled={generating} className="w-full">
+                  <Zap className={`h-4 w-4 mr-1.5 ${generating ? 'animate-spin' : ''}`} />
+                  {generating ? 'Generating...' : 'Generate Cards'}
+                </Button>
+                {binResult && (
+                  <div className={`text-xs p-2 rounded ${binResult.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                    {binResult.ok ? `Generated ${binResult.count} cards${binResult.saved ? ' (saved to pool)' : ''}` : binResult.error}
+                  </div>
+                )}
               </div>
-              <Button size="sm" onClick={add} className="w-full"><Plus className="h-4 w-4 mr-1.5" />Add Card</Button>
             </div>
-            <div className="border-t border-[var(--border-soft)] pt-3">
-              <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)] mb-2">Bulk Import</div>
-              <div className="text-xs text-[var(--text-muted)] mb-1">Format: number|month|year|cvc|country|label</div>
-              <textarea className="input w-full h-20 text-xs" placeholder="4111111111111111|12|2029|123|US|card1" value={bulkText} onChange={e => setBulkText(e.target.value)} />
-              <Button size="sm" variant="outline" onClick={bulkAdd} className="w-full mt-2">Bulk Import</Button>
+          </Card>
+
+          <Card className="bg-[var(--bg-pane)]/60">
+            <div className="space-y-4">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Add VCC</div>
+                <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Single card or bulk import</div>
+              </div>
+              <div className="space-y-2">
+                <input className="input w-full" placeholder="Card number" value={form.number} onChange={e => setForm({ ...form, number: e.target.value })} />
+                <div className="grid grid-cols-3 gap-2">
+                  <input className="input" placeholder="MM" value={form.exp_month} onChange={e => setForm({ ...form, exp_month: e.target.value })} />
+                  <input className="input" placeholder="YYYY" value={form.exp_year} onChange={e => setForm({ ...form, exp_year: e.target.value })} />
+                  <input className="input" placeholder="CVC" value={form.cvc} onChange={e => setForm({ ...form, cvc: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input className="input" placeholder="Country (US)" value={form.billing_country} onChange={e => setForm({ ...form, billing_country: e.target.value })} />
+                  <input className="input" placeholder="Label (optional)" value={form.label} onChange={e => setForm({ ...form, label: e.target.value })} />
+                </div>
+                <Button size="sm" onClick={add} className="w-full"><Plus className="h-4 w-4 mr-1.5" />Add Card</Button>
+              </div>
+              <div className="border-t border-[var(--border-soft)] pt-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)] mb-2">Bulk Import</div>
+                <div className="text-xs text-[var(--text-muted)] mb-1">Format: number|month|year|cvc|country|label</div>
+                <textarea className="input w-full h-20 text-xs" placeholder="4111111111111111|12|2029|123|US|card1" value={bulkText} onChange={e => setBulkText(e.target.value)} />
+                <Button size="sm" variant="outline" onClick={bulkAdd} className="w-full mt-2">Bulk Import</Button>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
 
         <Card className="overflow-x-auto bg-[var(--bg-pane)]/60">
           <table className="w-full text-sm">
@@ -141,7 +221,7 @@ export default function Vccs() {
                   <td className="py-2 px-2 font-mono text-xs">{v.number}</td>
                   <td className="py-2 px-2 text-xs">{String(v.exp_month).padStart(2, '0')}/{v.exp_year}</td>
                   <td className="py-2 px-2 text-xs">{v.billing_country}</td>
-                  <td className="py-2 px-2">{statusIcon(v.status)} </td>
+                  <td className="py-2 px-2">{statusIcon(v.status)}</td>
                   <td className="py-2 px-2 text-xs text-[var(--text-muted)]">{v.used_by || '-'}</td>
                   <td className="py-2 px-2 text-xs text-[var(--text-muted)]">{v.label || '-'}</td>
                   <td className="py-2 px-2">
