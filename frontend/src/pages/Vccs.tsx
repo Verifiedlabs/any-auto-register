@@ -87,7 +87,7 @@ export default function Vccs() {
         method: 'POST',
         body: JSON.stringify({ bin: binInput.trim() }),
       })
-      setBinLookup(res.data)
+      setBinLookup(res?.data || res)
     } catch (e: any) {
       setBinLookup({ error: e.message })
     }
