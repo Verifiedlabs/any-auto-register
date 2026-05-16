@@ -228,6 +228,7 @@ def test_windsurf_generate_trial_link_falls_back_to_next_turnstile_provider(monk
             *,
             account_id: str = "",
             org_id: str = "",
+            auth1_token: str = "",
             turnstile_token: str,
             success_url: str = "",
             cancel_url: str = "",
@@ -268,7 +269,7 @@ def test_windsurf_generate_trial_link_falls_back_to_next_turnstile_provider(monk
     platform = WindsurfPlatform(RegisterConfig(executor_type="protocol"))
     account = Account(platform="windsurf", email="user@example.com", password="", token="devin-session-token")
 
-    result = platform.execute_action("generate_trial_link", account, {})
+    result = platform.execute_action("generate_link", account, {})
 
     assert result["ok"] is True
     assert result["data"]["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_windsurf"
@@ -307,6 +308,7 @@ def test_windsurf_generate_trial_link_refreshes_session_after_subscribe_401(monk
             *,
             account_id: str = "",
             org_id: str = "",
+            auth1_token: str = "",
             turnstile_token: str,
             success_url: str = "",
             cancel_url: str = "",
@@ -339,7 +341,7 @@ def test_windsurf_generate_trial_link_refreshes_session_after_subscribe_401(monk
     platform = WindsurfPlatform(RegisterConfig(executor_type="protocol"))
     account = Account(platform="windsurf", email="user@example.com", password="", token="devin-session-token-old")
 
-    result = platform.execute_action("generate_trial_link", account, {})
+    result = platform.execute_action("generate_link", account, {})
 
     assert result["ok"] is True
     assert result["data"]["checkout_url"] == "https://checkout.stripe.com/c/pay/cs_test_refreshed"
@@ -367,6 +369,7 @@ def test_windsurf_payment_link_returns_checkout_only(monkeypatch):
             *,
             account_id: str = "",
             org_id: str = "",
+            auth1_token: str = "",
             turnstile_token: str,
             success_url: str = "",
             cancel_url: str = "",
@@ -397,7 +400,7 @@ def test_windsurf_payment_link_returns_checkout_only(monkeypatch):
         extra={"name": "User Example"},
     )
 
-    result = platform.execute_action("payment_link", account, {})
+    result = platform.execute_action("generate_link", account, {})
 
     assert result["ok"] is True
     assert result["data"]["payment_channel"] == "checkout"
@@ -434,7 +437,7 @@ def test_windsurf_payment_link_browser_uses_checkout_ui_flow(monkeypatch):
         token="devin-session-token",
     )
 
-    result = platform.execute_action("payment_link_browser", account, {})
+    result = platform.execute_action("generate_link_browser", account, {})
 
     assert result["ok"] is True
     assert result["data"]["payment_channel"] == "checkout"
@@ -465,7 +468,7 @@ def test_windsurf_payment_link_browser_can_return_checkout_only(monkeypatch):
         token="devin-session-token",
     )
 
-    result = platform.execute_action("payment_link_browser", account, {"payment_channel": "checkout"})
+    result = platform.execute_action("generate_link_browser", account, {"payment_channel": "checkout"})
 
     assert result["ok"] is True
     assert result["data"]["payment_channel"] == "checkout"

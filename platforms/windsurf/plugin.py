@@ -212,38 +212,77 @@ class WindsurfPlatform(BasePlatform):
 
     def _handle_generate_link_browser(self, account: Account, params: dict) -> dict:
         """Handle generate_link_browser capability for Windsurf."""
-        if not str(account.password or "").strip():
-            return {"ok": False, "error": "账号缺少 Windsurf 密码，无法执行浏览器自动化"}
-
-        turnstile_token = str(params.get("turnstile_token") or "").strip()
-        if turnstile_token:
-            self.log("使用提供的 Turnstile token 作为浏览器流程回退")
-        else:
-            self.log("未提供 Turnstile token，将在页面上自动过验证")
+        vcc = params.get("vcc") or None
         headless_param = params.get("headless")
         if headless_param in (None, ""):
             headless = self.config.executor_type == "headless"
         else:
             headless = str(headless_param).strip().lower() not in {"0", "false", "no", "off", "not"}
+        timeout = int(params.get("timeout") or 180)
+        proxy = self.config.proxy if self.config else None
 
-        from platforms.windsurf.browser_register import generate_checkout_link_via_windsurf_ui
+        has_password = bool(str(account.password or "").strip())
 
-        result = generate_checkout_link_via_windsurf_ui(
-            email=str(account.email or ""),
-            password=str(account.password or ""),
-            turnstile_token=turnstile_token,
-            timeout=int(params.get("timeout") or 180),
-            proxy=self.config.proxy if self.config else None,
-            headless=headless,
-            log_fn=self.log,
+        if has_password:
+            from platforms.windsurf.browser_register import (
+                generate_checkout_link_via_windsurf_ui,
+                WindsurfStripeCardCheckout,
+                _proxy_config, _launch_chromium, UA,
+            )
+            turnstile_token = str(params.get("turnstile_token") or "").strip()
+            checkout_result = generate_checkout_link_via_windsurf_ui(
+                email=str(account.email or ""),
+                password=str(account.password or ""),
+                turnstile_token=turnstile_token,
+                timeout=timeout,
+                proxy=proxy,
+                headless=headless,
+                log_fn=self.log,
+            )
+        else:
+            checkout_result = self._handle_generate_link(account, params).get("data") or {}
+
+        checkout_url = str(checkout_result.get("checkout_url") or "").strip()
+
+        if not vcc or not checkout_url:
+            return {
+                "ok": bool(checkout_url),
+                "data": {**checkout_result, "message": "Windsurf Pro Trial Stripe 链接已生成"},
+            }
+
+        self.log(f"VCC provided, auto-filling Stripe card: {checkout_url[:60]}...")
+        from platforms.windsurf.browser_register import (
+            WindsurfStripeCardCheckout, _proxy_config, _launch_chromium, UA,
         )
-        return {
-            "ok": True,
-            "data": {
-                **result,
-                "message": "Windsurf Pro Trial Stripe 链接已生成",
-            },
-        }
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as pw:
+            launch_opts = {
+                "headless": headless,
+                "args": ["--disable-blink-features=AutomationControlled", "--disable-dev-shm-usage", "--no-sandbox"],
+            }
+            proxy_cfg = _proxy_config(proxy)
+            if proxy_cfg:
+                launch_opts["proxy"] = proxy_cfg
+            browser = _launch_chromium(pw, launch_opts)
+            context = browser.new_context(viewport={"width": 1440, "height": 960}, user_agent=UA, locale="en-US")
+            context.set_default_timeout(90000)
+            page = context.new_page()
+            try:
+                page.goto(checkout_url, wait_until="domcontentloaded", timeout=90000)
+                card_checkout = WindsurfStripeCardCheckout(headless=headless, proxy=proxy, log_fn=self.log)
+                outcome = card_checkout.complete_card_checkout(page, vcc=vcc, timeout=timeout)
+                return {
+                    "ok": outcome.get("kind") == "success",
+                    "data": {
+                        **checkout_result,
+                        "card_outcome": outcome,
+                        "message": f"Stripe card checkout: {outcome.get('kind')}",
+                    },
+                }
+            finally:
+                context.close()
+                browser.close()
 
     def _handle_query_state(self, account: Account, params: dict) -> dict:
         """Handle query_state capability for Windsurf."""

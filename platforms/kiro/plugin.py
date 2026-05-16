@@ -35,9 +35,10 @@ class KiroPlatform(BasePlatform):
 
     # Declarative capabilities
     capabilities = [
-        "switch_desktop",   # Switch to desktop app
-        "refresh_token",    # Refresh token
-        "query_state",      # Query account state/quota
+        "switch_desktop",
+        "refresh_token",
+        "query_state",
+        "generate_link_browser",
     ]
 
     def __init__(self, config: RegisterConfig = None, mailbox: BaseMailbox = None):
@@ -317,3 +318,39 @@ class KiroPlatform(BasePlatform):
             }
 
         raise NotImplementedError(f"未知操作: {action_id}")
+
+    def _handle_generate_link_browser(self, account: Account, params: dict) -> dict:
+        from platforms.kiro.kiro_upgrade import upgrade_kiro_to_pro
+
+        extra = dict(account.extra or {})
+        vcc = params.get("vcc") or None
+        headless_param = params.get("headless")
+        if headless_param in (None, ""):
+            headless = self.config.executor_type == "headless" if self.config else True
+        else:
+            headless = str(headless_param).strip().lower() not in {"0", "false", "no", "off"}
+        timeout = int(params.get("timeout") or 180)
+        proxy = self.config.proxy if self.config else None
+        on_challenge = str(params.get("on_challenge") or "pause")
+
+        session_data = {
+            "email": str(account.email or ""),
+            "cookies": extra.get("cookies", []),
+            "localStorage": extra.get("localStorage", {}),
+            "sessionStorage": extra.get("sessionStorage", {}),
+            "accessToken": extra.get("accessToken", ""),
+            "refreshToken": extra.get("refreshToken", ""),
+        }
+        password = str(account.password or "").strip()
+
+        result = upgrade_kiro_to_pro(
+            session_data=session_data,
+            password=password,
+            vcc=vcc,
+            headless=headless,
+            proxy=proxy,
+            timeout=timeout,
+            on_challenge=on_challenge,
+            log_fn=self.log,
+        )
+        return result

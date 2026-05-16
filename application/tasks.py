@@ -194,7 +194,7 @@ def create_task(
         session.add(task)
         session.commit()
         session.refresh(task)
-    append_task_event(task.id, f"任务已创建: {task_type}", event_type="state")
+    append_task_event(task.id, f"Task created: {task_type}", event_type="state")
     return serialize_task(task)
 
 
@@ -301,7 +301,7 @@ def mark_incomplete_tasks_interrupted() -> None:
         ).all()
         for task in tasks:
             task.status = TASK_STATUS_INTERRUPTED
-            task.error = task.error or "任务在服务重启后被中断"
+            task.error = task.error or "Task interrupted after service restart"
             task.finished_at = _utcnow()
             task.updated_at = _utcnow()
             session.add(task)
@@ -309,7 +309,7 @@ def mark_incomplete_tasks_interrupted() -> None:
     for task in tasks:
         append_task_event(
             task.id,
-            "任务在服务重启后被标记为中断",
+            "Task marked as interrupted after service restart",
             event_type="state",
             level="warning",
         )
@@ -322,7 +322,7 @@ def request_cancel(task_id: str) -> Optional[dict[str, Any]]:
     )
     if not task:
         return None
-    append_task_event(task_id, "已请求取消任务", event_type="state", level="warning")
+    append_task_event(task_id, "Task cancellation requested", event_type="state", level="warning")
     return serialize_task(task)
 
 
@@ -332,7 +332,7 @@ def _request_cancel_mutation(task: TaskModel) -> None:
     if task.status == TASK_STATUS_PENDING:
         task.status = TASK_STATUS_CANCELLED
         task.finished_at = _utcnow()
-        task.error = task.error or "任务在开始前被取消"
+        task.error = task.error or "Task cancelled before starting"
     else:
         task.status = TASK_STATUS_CANCEL_REQUESTED
 
@@ -388,7 +388,7 @@ class TaskLogger:
             task.started_at = task.started_at or _utcnow()
 
         _mutate_task(self.task_id, _update)
-        self.log("任务已开始执行", event_type="state")
+        self.log("Task execution started", event_type="state")
 
     def is_cancel_requested(self) -> bool:
         with Session(engine) as session:
@@ -450,7 +450,7 @@ class TaskLogger:
         _mutate_task(self.task_id, _update)
         event_level = "error" if status == TASK_STATUS_FAILED else ("warning" if status in {TASK_STATUS_INTERRUPTED, TASK_STATUS_CANCELLED} else "info")
         self.log(
-            f"任务结束: {status}",
+            f"Task finished: {status}",
             level=event_level,
             event_type="state",
             detail={"status": status, "error": error},
@@ -536,7 +536,7 @@ def _run_single_account_check(account_id: int, logger: TaskLogger | None = None)
     with Session(engine) as session:
         model = session.get(AccountModel, account_id)
         if not model:
-            raise ValueError("账号不存在")
+            raise ValueError("Account not found")
         plugin = get(model.platform)(config=RegisterConfig())
         account = build_platform_account(session, model)
 
@@ -563,7 +563,7 @@ def _run_single_account_check(account_id: int, logger: TaskLogger | None = None)
 
     result = {"account_id": account_id, "valid": bool(valid), "platform": account.platform, "email": account.email}
     if logger:
-        logger.log(f"{account.email}: {'有效' if valid else '失效'}")
+        logger.log(f"{account.email}: {'valid' if valid else 'invalid'}")
     return valid, result
 
 
@@ -579,7 +579,7 @@ def execute_task(task_id: str) -> None:
     logger.mark_running()
 
     if logger.is_cancel_requested():
-        logger.finish(TASK_STATUS_CANCELLED, error="任务在启动后立即被取消")
+        logger.finish(TASK_STATUS_CANCELLED, error="Task cancelled immediately after starting")
         return
 
     handlers: dict[str, Callable[[dict[str, Any], TaskLogger], None]] = {
@@ -590,7 +590,7 @@ def execute_task(task_id: str) -> None:
     }
     handler = handlers.get(task_type)
     if not handler:
-        logger.finish(TASK_STATUS_FAILED, error=f"未知任务类型: {task_type}")
+        logger.finish(TASK_STATUS_FAILED, error=f"Unknown task type: {task_type}")
         return
     handler(payload, logger)
 
@@ -619,7 +619,7 @@ def _bool_config(value: Any, default: bool) -> bool:
         return default
     if isinstance(value, bool):
         return value
-    return str(value).strip().lower() not in {"0", "false", "no", "off", "否"}
+    return str(value).strip().lower() not in {"0", "false", "no", "off"}
 
 
 def _int_config(value: Any, default: int) -> int:
@@ -646,12 +646,12 @@ def _auto_followup_windsurf_payment(
         if not _bool_config(extra_cfg.get("auto_payment_link"), True):
             return
     if not str(getattr(account, "password", "") or "").strip() and use_browser:
-        logger.log("Windsurf 注册后自动升级已跳过: 账号缺少密码", level="error")
+        logger.log("Windsurf post-registration auto-upgrade skipped: account missing password", level="error")
         return
     extra = dict(payload.get("extra") or {})
     turnstile_token = str(extra.get("turnstile_token") or "").strip()
     if use_browser:
-        action_id = "payment_link_browser"
+        action_id = "generate_link_browser"
         params = {
             "timeout": _int_config(extra.get("windsurf_payment_timeout"), 240),
             "headless": "true" if _bool_config(extra.get("windsurf_payment_headless"), False) else "false",
@@ -660,20 +660,20 @@ def _auto_followup_windsurf_payment(
         if turnstile_token:
             params["turnstile_token"] = turnstile_token
     else:
-        action_id = "payment_link"
+        action_id = "generate_link"
         params = {}
         if turnstile_token:
             params["turnstile_token"] = turnstile_token
-    logger.log("注册成功，开始自动生成 Windsurf Pro Trial Stripe 链接")
+    logger.log("Registration successful, starting auto-generation of Windsurf Pro Trial Stripe link")
     try:
         result = platform.execute_action(action_id, account, params)
     except Exception as exc:
-        message = f"Windsurf 注册后自动升级失败: {exc}"
+        message = f"Windsurf post-registration auto-upgrade failed: {exc}"
         logger.record_error(message)
         logger.log(message, level="error")
         return
     if not result.get("ok"):
-        message = f"Windsurf 注册后自动升级失败: {result.get('error') or 'unknown error'}"
+        message = f"Windsurf post-registration auto-upgrade failed: {result.get('error') or 'unknown error'}"
         logger.record_error(message)
         logger.log(message, level="error")
         return
@@ -710,8 +710,8 @@ def _execute_register_task(payload: dict[str, Any], logger: TaskLogger) -> None:
     logger.set_progress(0, progress_total)
     if herosms_enabled:
         logger.log(
-            f"HeroSMS 模式: 成功目标 {target_success}，失败自动补尝试，"
-            f"号码仍可复用时最多额外成功 {hero_extra_max} 个"
+            f"HeroSMS mode: target {target_success} success, auto-retry on failure, "
+            f"max {hero_extra_max} extra success when number is reusable"
         )
 
     try:
@@ -802,10 +802,10 @@ def _execute_register_task(payload: dict[str, Any], logger: TaskLogger) -> None:
                 alive, info = is_herosms_phone_cache_alive(sms_settings)
                 if alive:
                     logger.log(
-                        "HeroSMS 号码仍可复用: "
+                        "HeroSMS number still reusable: "
                         f"{str(info.get('phone_number') or '')[:5]}**** "
-                        f"剩余 {int(info.get('remaining_seconds') or 0)} 秒，"
-                        f"已成功 {int(info.get('use_count') or 0)} 次"
+                        f"{int(info.get('remaining_seconds') or 0)}s remaining, "
+                        f"{int(info.get('use_count') or 0)} uses"
                     )
                 return bool(alive)
             except Exception:
@@ -859,7 +859,7 @@ def _execute_register_task(payload: dict[str, Any], logger: TaskLogger) -> None:
             "extra_success": max(0, success - target_success),
             "hero_sms_reuse": True,
         })
-    summary = f"完成: 成功 {success} 个, 失败 {len(errors)} 个"
+    summary = f"Done: {success} succeeded, {len(errors)} failed"
     logger.log(summary, event_type="summary")
     if logger.is_cancel_requested():
         logger.finish(TASK_STATUS_CANCELLED, error="任务已取消")

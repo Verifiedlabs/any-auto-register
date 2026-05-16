@@ -427,6 +427,28 @@ def _migrate_legacy_accounts_schema() -> None:
         connection.exec_driver_sql("PRAGMA foreign_keys=ON")
 
 
+class VccModel(SQLModel, table=True):
+    __tablename__ = "vccs"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    number: str = Field(index=True)
+    exp_month: int
+    exp_year: int
+    cvc: str
+    billing_name: str = ""
+    billing_country: str = "US"
+    billing_line1: str = ""
+    billing_line2: str = ""
+    billing_city: str = ""
+    billing_state: str = ""
+    billing_postal_code: str = ""
+    label: str = ""
+    status: str = Field(default="active", index=True)
+    used_by: str = ""
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
+
+
 def init_db():
     SQLModel.metadata.create_all(engine)
     from core.account_graph import sync_all_account_graphs

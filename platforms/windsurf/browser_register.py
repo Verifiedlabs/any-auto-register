@@ -9,11 +9,81 @@ import time
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
-from playwright.sync_api import Page, sync_playwright
+from playwright.sync_api import Page, Locator, sync_playwright
 try:
     from camoufox.sync_api import Camoufox
 except Exception:  # pragma: no cover
     Camoufox = None
+
+
+def _jitter(lo: int, hi: int) -> int:
+    return random.randint(lo, hi)
+
+
+def _random_char_near(ch: str) -> str:
+    neighbors: dict[str, str] = {
+        'a': 'sq', 'b': 'vn', 'c': 'xv', 'd': 'sf', 'e': 'wr',
+        'f': 'dg', 'g': 'fh', 'h': 'gj', 'i': 'uo', 'j': 'hk',
+        'k': 'jl', 'l': 'k', 'm': 'n', 'n': 'mb', 'o': 'ip',
+        'p': 'o', 'q': 'w', 'r': 'et', 's': 'ad', 't': 'ry',
+        'u': 'yi', 'v': 'cb', 'w': 'qe', 'x': 'zc', 'y': 'tu',
+        'z': 'x',
+    }
+    pool = neighbors.get(ch.lower(), '')
+    if not pool:
+        return ch
+    return random.choice(pool)
+
+
+def human_type(locator: "Locator", text: str, *, mistakes: float = 0.0, clear: bool = True) -> None:
+    locator.click()
+    time.sleep(_jitter(60, 180) / 1000)
+    if clear:
+        locator.press('Control+a')
+        time.sleep(_jitter(20, 60) / 1000)
+        locator.press('Delete')
+        time.sleep(_jitter(30, 80) / 1000)
+    chars_typed = 0
+    for ch in text:
+        if chars_typed > 0 and chars_typed % _jitter(4, 8) == 0 and random.random() < 0.25:
+            time.sleep(_jitter(180, 450) / 1000)
+        if mistakes > 0 and random.random() < mistakes:
+            wrong = _random_char_near(ch)
+            locator.press(wrong, delay=_jitter(20, 60))
+            time.sleep(_jitter(120, 300) / 1000)
+            locator.press('Backspace', delay=_jitter(20, 50))
+            time.sleep(_jitter(80, 200) / 1000)
+        locator.press(ch, delay=_jitter(30, 110))
+        time.sleep(_jitter(20, 80) / 1000)
+        chars_typed += 1
+    time.sleep(_jitter(80, 240) / 1000)
+
+
+def prewarm_stripe_page(page: "Page", log_fn: Callable[[str], None] = print) -> None:
+    already = page.evaluate("() => !!window.__stripePrewarmed")
+    if already:
+        return
+    time.sleep(_jitter(900, 2200) / 1000)
+    vp = page.viewport_size
+    if callable(vp):
+        vp = vp()
+    if vp:
+        w, h = vp["width"], vp["height"]
+        points = [
+            (_jitter(20, 80), _jitter(20, 60)),
+            (w // 2 + _jitter(-40, 40), h // 2 + _jitter(-30, 30)),
+            (w // 2 + _jitter(-20, 20), int(h * 0.45) + _jitter(-10, 10)),
+        ]
+        for x, y in points:
+            page.mouse.move(x + _jitter(-8, 8), y + _jitter(-6, 6), steps=_jitter(6, 14))
+            time.sleep(_jitter(80, 220) / 1000)
+    time.sleep(_jitter(450, 1100) / 1000)
+    page.mouse.wheel(0, _jitter(80, 180))
+    time.sleep(_jitter(300, 800) / 1000)
+    page.mouse.wheel(0, -_jitter(40, 100))
+    time.sleep(_jitter(200, 500) / 1000)
+    page.evaluate("() => { window.__stripePrewarmed = true; }")
+    log_fn("[stripe-stealth] prewarmed")
 
 from platforms.windsurf.core import (
     SEAT_SERVICE,
@@ -851,6 +921,210 @@ def solve_turnstile_in_headed_browser(
             browser.close()
 
 
+class WindsurfStripeCardCheckout:
+    CARD_NUMBER_SELECTOR = '#cardNumber, input[name="cardNumber"], input[autocomplete="cc-number"]'
+    CARD_EXPIRY_SELECTOR = '#cardExpiry, input[name="cardExpiry"], input[autocomplete="cc-exp"]'
+    CARD_CVC_SELECTOR = '#cardCvc, input[name="cardCvc"], input[autocomplete="cc-csc"]'
+    BILLING_NAME_SELECTOR = '#billingName, input[name="billingName"], input[autocomplete="cc-name"]'
+    BILLING_COUNTRY_SELECTOR = '#billingCountry, select[name="billingCountry"]'
+    BILLING_LINE1_SELECTOR = '#billingAddressLine1, input[name="billingAddressLine1"]'
+    BILLING_LINE2_SELECTOR = '#billingAddressLine2, input[name="billingAddressLine2"]'
+    BILLING_CITY_SELECTOR = '#billingLocality, input[name="billingLocality"]'
+    BILLING_STATE_SELECTOR = '#billingAdministrativeArea, select[name="billingAdministrativeArea"]'
+    BILLING_POSTAL_SELECTOR = '#billingPostalCode, input[name="billingPostalCode"]'
+
+    def __init__(self, *, headless: bool = True, proxy: str | None = None, log_fn: Callable[[str], None] = print):
+        self.headless = headless
+        self.proxy = proxy
+        self.log = log_fn
+
+    def complete_card_checkout(
+        self,
+        page: "Page",
+        *,
+        vcc: dict,
+        timeout: int = 180,
+    ) -> dict[str, Any]:
+        page.wait_for_timeout(3000)
+        page_text = str(page.locator("body").inner_text(timeout=3000) or "")
+        if "Something went wrong" in page_text or "could not be found" in page_text:
+            raise RuntimeError("Stripe Checkout expired, regenerate link")
+
+        prewarm_stripe_page(page, self.log)
+
+        outcome: dict[str, Any] = {"kind": "unknown"}
+
+        def _capture(response):
+            try:
+                if "/confirm" not in response.url and "api.stripe.com/v1/payment_pages/" not in response.url:
+                    return
+                data = response.json()
+                if not isinstance(data, dict):
+                    return
+                if data.get("error"):
+                    msg = str(data["error"].get("message") or "")
+                    code = str(data["error"].get("code") or "")
+                    if any(k in code for k in ("card_declined", "insufficient_funds", "do_not_honor", "lost_card", "stolen_card")):
+                        outcome.update({"kind": "declined", "message": msg, "code": code})
+                    elif "3d_secure" in code or "authentication" in code:
+                        outcome.update({"kind": "3ds"})
+                    else:
+                        outcome.update({"kind": "error", "message": msg})
+                elif data.get("status") in ("succeeded", "active"):
+                    outcome.update({"kind": "success", "finalUrl": str(page.url or "")})
+            except Exception:
+                pass
+
+        page.on("response", _capture)
+        try:
+            self._fill_card_fields(page, vcc)
+            self._fill_billing_fields(page, vcc)
+            self._check_terms(page)
+            self.log("Submitting Stripe card checkout")
+            self._submit(page)
+
+            deadline = time.time() + max(int(timeout or 180), 30)
+            while time.time() < deadline:
+                current_url = str(page.url or "")
+                if "subscription/pending" in current_url or "subscription/success" in current_url:
+                    outcome.update({"kind": "success", "finalUrl": current_url})
+                    break
+                if outcome.get("kind") not in ("unknown",):
+                    break
+                page.wait_for_timeout(1000)
+
+            if outcome.get("kind") == "unknown":
+                outcome.update({"kind": "timeout"})
+
+            return outcome
+        finally:
+            try:
+                page.remove_listener("response", _capture)
+            except Exception:
+                pass
+
+    def _fill_card_fields(self, page: "Page", vcc: dict) -> None:
+        stripe_frame = None
+        for frame in page.frames:
+            if "stripe.com" in str(frame.url or ""):
+                stripe_frame = frame
+                break
+
+        target = stripe_frame or page
+
+        for selector in self.CARD_NUMBER_SELECTOR.split(", "):
+            try:
+                loc = target.locator(selector).first
+                if loc.count() and loc.is_visible():
+                    human_type(loc, str(vcc.get("number", "")).replace(" ", ""), mistakes=0.0)
+                    time.sleep(_jitter(300, 600) / 1000)
+                    break
+            except Exception:
+                pass
+
+        for selector in self.CARD_EXPIRY_SELECTOR.split(", "):
+            try:
+                loc = target.locator(selector).first
+                if loc.count() and loc.is_visible():
+                    exp = f"{int(vcc.get('expMonth', 1)):02d}{str(vcc.get('expYear', 2029))[-2:]}"
+                    human_type(loc, exp, mistakes=0.0)
+                    time.sleep(_jitter(200, 500) / 1000)
+                    break
+            except Exception:
+                pass
+
+        for selector in self.CARD_CVC_SELECTOR.split(", "):
+            try:
+                loc = target.locator(selector).first
+                if loc.count() and loc.is_visible():
+                    human_type(loc, str(vcc.get("cvc", "")), mistakes=0.0)
+                    time.sleep(_jitter(700, 1100) / 1000)
+                    break
+            except Exception:
+                pass
+
+    def _fill_billing_fields(self, page: "Page", vcc: dict) -> None:
+        from core.address_gen import generate_billing_address_for_vcc
+        billing = generate_billing_address_for_vcc(vcc)
+        if not billing:
+            return
+
+        for selector in self.BILLING_NAME_SELECTOR.split(", "):
+            try:
+                loc = page.locator(selector).first
+                if loc.count() and loc.is_visible():
+                    human_type(loc, str(billing.get("name", "")), mistakes=0.03)
+                    time.sleep(_jitter(150, 400) / 1000)
+                    break
+            except Exception:
+                pass
+
+        country = str(billing.get("country", "US")).strip()
+        for selector in self.BILLING_COUNTRY_SELECTOR.split(", "):
+            try:
+                loc = page.locator(selector).first
+                if loc.count() and loc.is_visible():
+                    loc.select_option(value=country)
+                    page.wait_for_timeout(700)
+                    break
+            except Exception:
+                pass
+
+        for selector, key in [
+            (self.BILLING_LINE1_SELECTOR, "line1"),
+            (self.BILLING_LINE2_SELECTOR, "line2"),
+            (self.BILLING_CITY_SELECTOR, "city"),
+            (self.BILLING_POSTAL_SELECTOR, "postalCode"),
+        ]:
+            val = str(billing.get(key, "") or "").strip()
+            if not val:
+                continue
+            for sel in selector.split(", "):
+                try:
+                    loc = page.locator(sel).first
+                    if loc.count() and loc.is_visible():
+                        human_type(loc, val, mistakes=0.03)
+                        time.sleep(_jitter(120, 300) / 1000)
+                        break
+                except Exception:
+                    pass
+
+        state = str(billing.get("state", "") or "").strip()
+        if state:
+            for sel in self.BILLING_STATE_SELECTOR.split(", "):
+                try:
+                    loc = page.locator(sel).first
+                    if loc.count() and loc.is_visible():
+                        tag = str(loc.evaluate("(el) => el.tagName")).lower()
+                        if tag == "select":
+                            loc.select_option(value=state)
+                        else:
+                            human_type(loc, state, mistakes=0.0)
+                        time.sleep(_jitter(100, 250) / 1000)
+                        break
+                except Exception:
+                    pass
+
+    def _check_terms(self, page: "Page") -> None:
+        try:
+            cb = page.locator("#termsOfServiceConsentCheckbox").first
+            if cb.count() and not cb.is_checked():
+                cb.check(force=True)
+                page.wait_for_timeout(300)
+        except Exception:
+            pass
+
+    def _submit(self, page: "Page") -> None:
+        for selector in ('button[data-testid="hosted-payment-submit-button"]', 'button[type="submit"]'):
+            try:
+                btn = page.locator(selector).last
+                if btn.count() and btn.is_visible() and btn.is_enabled():
+                    btn.evaluate("(el) => el.click()")
+                    return
+            except Exception:
+                pass
+
+
 class WindsurfStripeCheckoutBrowser:
     def __init__(
         self,
@@ -943,6 +1217,7 @@ class WindsurfStripeCheckoutBrowser:
         page_text = self._page_text(page)
         if "Something went wrong" in page_text or "could not be found" in page_text:
             raise RuntimeError("Stripe Checkout 已失效，请重新生成 Windsurf 订阅链接")
+        prewarm_stripe_page(page, self.log)
 
         confirm_payload: dict[str, Any] = {}
         redirect_url = ""
@@ -1186,6 +1461,7 @@ class WindsurfStripeCheckoutBrowser:
             billing_postal_code,
             selectors=('#billingPostalCode', 'input[name="billingPostalCode"]', 'input[autocomplete="billing postal-code"]', 'input[autocomplete="postal-code"]'),
         )
+        time.sleep(_jitter(700, 1100) / 1000)
 
     def _select_alipay(self, page: Page) -> None:
         for selector in (
@@ -1371,7 +1647,7 @@ class WindsurfStripeCheckoutBrowser:
                         if tag == "select":
                             self._select_option_flexible(locator, text)
                         else:
-                            locator.fill(text)
+                            human_type(locator, text, mistakes=0.04)
                     return True
             except Exception:
                 pass
@@ -1385,7 +1661,7 @@ class WindsurfStripeCheckoutBrowser:
                         if tag == "select":
                             self._select_option_flexible(locator, text)
                         else:
-                            locator.fill(text)
+                            human_type(locator, text, mistakes=0.04)
                     return True
             except Exception:
                 pass
@@ -1824,16 +2100,64 @@ class WindsurfBrowserPaymentFlow:
                 browser.close()
 
     def _login(self, page: Page, *, email: str, password: str) -> None:
-        self.log("Step1: 打开 Windsurf 登录页")
-        page.goto(f"{WINDSURF_BASE}/account/login", wait_until="networkidle", timeout=90000)
-        self._accept_cookies_if_present(page)
-        page.locator('input[type="email"]').fill(email)
-        page.locator('button[type="submit"]').click()
-        page.wait_for_selector('input[name="password"]', state="visible", timeout=90000)
-        self.log("Step2: 输入 Windsurf 账号密码")
-        page.locator('input[name="password"]').fill(password)
-        page.locator('button[type="submit"]').click()
-        page.wait_for_url(re.compile(rf"{re.escape(WINDSURF_BASE)}/profile"), timeout=90000)
+        from platforms.windsurf.core import WindsurfClient
+        import time as _time
+        self.log("Step1: Protocol login → inject session ke browser")
+        client = WindsurfClient(proxy=self.proxy, log_fn=self.log)
+        start_data = client._json_post(
+            "/_devin-auth/email/start",
+            {"email": email, "mode": "login", "product": "Windsurf"},
+        )
+        verification_token = str(start_data.get("email_verification_token") or "")
+        if not verification_token:
+            raise RuntimeError("Windsurf login: no email_verification_token")
+        self.log("Step2: 等待邮箱 OTP (最多 120s)...")
+        otp = None
+        for _ in range(40):
+            _time.sleep(3)
+            try:
+                import requests as _req
+                resp = _req.get(
+                    f"https://api.tempmail.lol/v2/inbox?email={email}",
+                    timeout=10,
+                )
+                if resp.status_code == 200:
+                    for msg in resp.json().get("emails", []):
+                        import re as _re
+                        m = _re.search(r"\b(\d{6})\b", str(msg.get("body", "") or msg.get("subject", "")))
+                        if m:
+                            otp = m.group(1)
+                            break
+            except Exception:
+                pass
+            if otp:
+                break
+        if not otp:
+            raise RuntimeError("Windsurf login: OTP timeout (120s)")
+        self.log(f"Step3: 提交 OTP {otp}")
+        data = client._json_post(
+            "/_devin-auth/email/complete",
+            {
+                "email_verification_token": verification_token,
+                "code": otp,
+                "mode": "login",
+                "password": password,
+            },
+        )
+        auth_token = str(data.get("token") or "")
+        auth1_token = auth_token if auth_token.startswith("auth1_") else ""
+        plain_token = auth_token if not auth_token.startswith("auth1_") else ""
+        auth = client.post_auth(plain_token, auth1_token=auth1_token)
+        session_token = auth.get("session_token", "")
+        post_auth1 = auth.get("auth_token", "") or auth1_token
+        if not session_token:
+            raise RuntimeError("Windsurf login: no session_token from post_auth")
+        self.log("Step4: 注入 session 到浏览器")
+        page.goto(f"{WINDSURF_BASE}/", wait_until="domcontentloaded", timeout=30000)
+        page.evaluate(f"localStorage.setItem('auth_token', '{session_token}')")
+        page.evaluate(f"localStorage.setItem('auth1_token', '{post_auth1}')")
+        page.goto(f"{WINDSURF_BASE}/profile", wait_until="domcontentloaded", timeout=30000)
+        self.log("Step5: Login selesai")
 
     def _open_pro_checkout(self, page: Page, *, turnstile_token: str, timeout: int) -> str:
         self.log("Step3: 进入 Pro 升级页面")
