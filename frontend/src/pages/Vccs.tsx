@@ -3,7 +3,7 @@ import { apiFetch } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, CreditCard, CheckCircle, XCircle, Clock, Search, Zap } from 'lucide-react'
+import { Plus, Trash2, CreditCard, CheckCircle, XCircle, Clock, Search, Zap, Eye, EyeOff } from 'lucide-react'
 
 export default function Vccs() {
   const [vccs, setVccs] = useState<any[]>([])
@@ -16,6 +16,8 @@ export default function Vccs() {
   const [binResult, setBinResult] = useState<any>(null)
   const [binLookup, setBinLookup] = useState<any>(null)
   const [generating, setGenerating] = useState(false)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [expandedDetail, setExpandedDetail] = useState<any>(null)
 
   const load = () => apiFetch('/vccs').then((d: any) => setVccs(d.vccs || []))
 
@@ -57,6 +59,17 @@ export default function Vccs() {
   const del = async (id: number) => {
     await apiFetch(`/vccs/${id}`, { method: 'DELETE' })
     load()
+  }
+
+  const toggleDetail = async (id: number) => {
+    if (expandedId === id) {
+      setExpandedId(null)
+      setExpandedDetail(null)
+      return
+    }
+    const res = await apiFetch(`/vccs/${id}`)
+    setExpandedDetail(res.vcc || res)
+    setExpandedId(id)
   }
 
   const genCards = async () => {
@@ -217,6 +230,7 @@ export default function Vccs() {
             </thead>
             <tbody>
               {vccs.map((v: any) => (
+                <>
                 <tr key={v.id} className="border-b border-[var(--border-soft)]/50 hover:bg-[var(--bg-hover)]">
                   <td className="py-2 px-2 font-mono text-xs">{v.number}</td>
                   <td className="py-2 px-2 text-xs">{String(v.exp_month).padStart(2, '0')}/{v.exp_year}</td>
@@ -224,10 +238,26 @@ export default function Vccs() {
                   <td className="py-2 px-2">{statusIcon(v.status)}</td>
                   <td className="py-2 px-2 text-xs text-[var(--text-muted)]">{v.used_by || '-'}</td>
                   <td className="py-2 px-2 text-xs text-[var(--text-muted)]">{v.label || '-'}</td>
-                  <td className="py-2 px-2">
+                  <td className="py-2 px-2 flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => toggleDetail(v.id)}>
+                      {expandedId === v.id ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </Button>
                     <Button variant="ghost" size="sm" onClick={() => del(v.id)}><Trash2 className="h-3.5 w-3.5 text-red-400" /></Button>
                   </td>
                 </tr>
+                {expandedId === v.id && expandedDetail && (
+                  <tr key={`${v.id}-detail`} className="bg-[var(--bg-hover)]">
+                    <td colSpan={7} className="py-2 px-4">
+                      <div className="flex gap-4 text-xs font-mono">
+                        <span><b>Number:</b> {expandedDetail.number}</span>
+                        <span><b>CVC:</b> {expandedDetail.cvc}</span>
+                        <span><b>Exp:</b> {String(expandedDetail.exp_month).padStart(2,'0')}/{expandedDetail.exp_year}</span>
+                        <span><b>Address:</b> {expandedDetail.billing_line1}, {expandedDetail.billing_city}, {expandedDetail.billing_state} {expandedDetail.billing_postal_code}</span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </>
               ))}
               {vccs.length === 0 && (
                 <tr><td colSpan={7} className="py-8 text-center text-sm text-[var(--text-muted)]">No VCC cards added yet</td></tr>
