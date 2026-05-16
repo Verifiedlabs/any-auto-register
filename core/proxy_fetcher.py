@@ -58,3 +58,15 @@ def format_proxy_url(proxy: dict) -> str:
     else:
         proto = "http"
     return f"{proto}://{proxy['ip']}:{proxy['port']}"
+
+
+def check_proxy_alive(proxy_url: str, timeout: int = 5) -> bool:
+    try:
+        import urllib.request
+        proxy_handler = urllib.request.ProxyHandler({"http": proxy_url, "https": proxy_url})
+        opener = urllib.request.build_opener(proxy_handler)
+        req = urllib.request.Request("http://httpbin.org/ip", method="GET")
+        with opener.open(req, timeout=timeout) as r:
+            return r.status == 200
+    except:
+        return False

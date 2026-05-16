@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from core.proxy_fetcher import fetch_proxies, fetch_all_unique, format_proxy_url
+from core.proxy_fetcher import fetch_proxies, fetch_all_unique, format_proxy_url, check_proxy_alive
 from core.db import engine
 from sqlmodel import Session, text
 
@@ -16,11 +16,20 @@ class ProxyFetchRequest(BaseModel):
     proxy_type: Optional[str] = None
     limit: int = 100
     save_to_pool: bool = False
+    check_alive: bool = False
 
 
 @router.post("/fetch")
 def proxy_fetch(req: ProxyFetchRequest):
     proxies = fetch_proxies(limit=req.limit, proxy_type=req.proxy_type)
+
+    if req.check_alive:
+        alive_proxies = []
+        for p in proxies:
+            url = format_proxy_url(p)
+            if check_proxy_alive(url):
+                alive_proxies.append(p)
+        proxies = alive_proxies
 
     if req.save_to_pool and proxies:
         from core.db import engine

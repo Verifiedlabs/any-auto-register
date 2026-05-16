@@ -12,6 +12,7 @@ export default function Proxies() {
   const [checking, setChecking] = useState(false)
   const [fetchType, setFetchType] = useState('SOCKS5')
   const [fetchLimit, setFetchLimit] = useState('100')
+  const [fetchCheckAlive, setFetchCheckAlive] = useState(true)
   const [fetching, setFetching] = useState(false)
   const [fetchResult, setFetchResult] = useState<any>(null)
 
@@ -59,7 +60,7 @@ export default function Proxies() {
     try {
       const res = await apiFetch('/proxy-fetch/fetch', {
         method: 'POST',
-        body: JSON.stringify({ proxy_type: fetchType, limit: parseInt(fetchLimit) || 100, save_to_pool: true }),
+        body: JSON.stringify({ proxy_type: fetchType, limit: parseInt(fetchLimit) || 100, save_to_pool: true, check_alive: fetchCheckAlive }),
       })
       setFetchResult(res)
       load()
@@ -157,6 +158,10 @@ export default function Proxies() {
                 </select>
                 <input className="control-surface text-xs" placeholder="Limit" value={fetchLimit} onChange={e => setFetchLimit(e.target.value)} />
               </div>
+              <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <input type="checkbox" checked={fetchCheckAlive} onChange={e => setFetchCheckAlive(e.target.checked)} />
+                Check alive before saving
+              </label>
               <Button onClick={fetchProxies} disabled={fetching} className="w-full">
                 <Download className={`h-4 w-4 mr-1.5 ${fetching ? 'animate-spin' : ''}`} />
                 {fetching ? 'Fetching...' : 'Fetch & Save to Pool'}
