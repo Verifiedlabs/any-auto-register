@@ -63,13 +63,27 @@ def bin_generate(req: BinGenerateRequest):
     if req.check_live:
         live_cards = []
         dead_cards = []
-        for card in cards:
-            result = check_card_live(card["number"], card["expMonth"], card["expYear"], card["cvc"])
-            card["check"] = result
-            if result["live"]:
-                live_cards.append(card)
-            else:
-                dead_cards.append(card)
+        max_attempts = req.count * 10
+        attempts = 0
+        while len(live_cards) < req.count and attempts < max_attempts:
+            batch = generate_cards(
+                bin_prefix=req.bin,
+                count=min(5, req.count - len(live_cards)),
+                exp_month=req.exp_month,
+                exp_year=req.exp_year,
+                length=req.length,
+            )
+            for card in batch:
+                attempts += 1
+                result = check_card_live(card["number"], card["expMonth"], card["expYear"], card["cvc"])
+                card["check"] = result
+                if result["live"]:
+                    live_cards.append(card)
+                    if len(live_cards) >= req.count:
+                        break
+                else:
+                    dead_cards.append(card)
+        cards = live_cards + dead_cards
         cards_to_save = live_cards
     else:
         live_cards = cards
