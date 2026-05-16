@@ -70,3 +70,14 @@ def check_proxy_alive(proxy_url: str, timeout: int = 5) -> bool:
             return r.status == 200
     except:
         return False
+
+
+def resolve_ip_country(ip: str) -> str:
+    try:
+        import urllib.request, json
+        req = urllib.request.Request(f"http://ip-api.com/json/{ip}?fields=countryCode")
+        with urllib.request.urlopen(req, timeout=5) as r:
+            data = json.loads(r.read())
+            return data.get("countryCode", "")
+    except:
+        return ""

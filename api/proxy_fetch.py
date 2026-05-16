@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from core.proxy_fetcher import fetch_proxies, fetch_all_unique, format_proxy_url, check_proxy_alive
+from core.proxy_fetcher import fetch_proxies, fetch_all_unique, format_proxy_url, check_proxy_alive, resolve_ip_country
 from core.db import engine
 from sqlmodel import Session, text
 
@@ -34,13 +34,18 @@ def proxy_fetch(req: ProxyFetchRequest):
     if req.save_to_pool and proxies:
         from core.db import engine
         count = 0
+        import time as _time
         with Session(engine) as s:
             for p in proxies:
                 url = format_proxy_url(p)
                 existing = s.exec(text("SELECT id FROM proxies WHERE url = :url").bindparams(url=url)).first()
                 if not existing:
+                    region = p.get("country", "") or ""
+                    if not region or region == "Unknown":
+                        region = resolve_ip_country(p["ip"])
+                        _time.sleep(0.1)
                     s.exec(
-                        text("INSERT INTO proxies (url, region, is_active, success_count, fail_count) VALUES (:url, :region, 1, 0, 0)").bindparams(url=url, region=p.get("country", "")),
+                        text("INSERT INTO proxies (url, region, is_active, success_count, fail_count) VALUES (:url, :region, 1, 0, 0)").bindparams(url=url, region=region),
                     )
                     count += 1
             s.commit()
