@@ -141,6 +141,29 @@ def generate_cards(
     return cards
 
 
+def check_card_live(number: str, exp_month: int, exp_year: int, cvc: str) -> dict:
+    try:
+        exp_m = f"{int(exp_month):02d}"
+        exp_y = str(exp_year)[-2:] if len(str(exp_year)) == 4 else str(exp_year)
+        data = f"{number}|{exp_m}|{exp_y}|{cvc}"
+        resp = requests.post(
+            "https://api.chkr.cc/",
+            json={"data": data},
+            timeout=30,
+        )
+        if resp.status_code == 200:
+            result = resp.json()
+            return {
+                "live": result.get("code") == 1,
+                "status": result.get("status", "Unknown"),
+                "message": result.get("message", ""),
+                "card_info": result.get("card", {}),
+            }
+        return {"live": False, "status": "error", "message": f"HTTP {resp.status_code}"}
+    except Exception as e:
+        return {"live": False, "status": "error", "message": str(e)}
+
+
 def lookup_bin(bin_prefix: str) -> dict:
     cleaned = ''.join(c for c in bin_prefix if c.isdigit())[:8]
     if len(cleaned) < 6:
