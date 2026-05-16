@@ -187,7 +187,7 @@ export default function Vccs() {
                 </Button>
                 {binResult && (
                   <div className={`text-xs p-2 rounded ${binResult.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                    {binResult.ok ? `Generated ${binResult.count} cards | Live: ${binResult.live ?? '?'} | Dead: ${binResult.dead ?? '?'}${binResult.saved ? ` | Saved: ${binResult.saved_count}` : ''}` : binResult.error}
+                    {binResult.ok ? `Generated ${binResult.count} cards | Live: ${binResult.live ?? '?'} | Dead: ${binResult.dead ?? '?'}${binResult.errors ? ` | Errors: ${binResult.errors}` : ''}${binResult.saved ? ` | Saved: ${binResult.saved_count}` : ''}` : binResult.error}
                   </div>
                 )}
               </div>

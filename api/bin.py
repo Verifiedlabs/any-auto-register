@@ -63,6 +63,7 @@ def bin_generate(req: BinGenerateRequest):
     if req.check_live:
         live_cards = []
         dead_cards = []
+        error_cards = []
         max_attempts = req.count * 10
         attempts = 0
         while len(live_cards) < req.count and attempts < max_attempts:
@@ -81,13 +82,20 @@ def bin_generate(req: BinGenerateRequest):
                     live_cards.append(card)
                     if len(live_cards) >= req.count:
                         break
+                elif result["status"] == "error":
+                    error_cards.append(card)
+                    if len(error_cards) >= 3:
+                        break
                 else:
                     dead_cards.append(card)
-        cards = live_cards + dead_cards
+            if len(error_cards) >= 3:
+                break
+        cards = live_cards + dead_cards + error_cards
         cards_to_save = live_cards
     else:
         live_cards = cards
         dead_cards = []
+        error_cards = []
         cards_to_save = cards
 
     if req.save_to_pool and cards_to_save:
@@ -118,6 +126,7 @@ def bin_generate(req: BinGenerateRequest):
         "count": len(cards),
         "live": len(live_cards),
         "dead": len(dead_cards),
+        "errors": len(error_cards),
         "saved": req.save_to_pool and len(cards_to_save) > 0,
         "saved_count": len(cards_to_save) if req.save_to_pool else 0,
     }
