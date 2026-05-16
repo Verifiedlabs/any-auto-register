@@ -13,6 +13,7 @@ export default function Vccs() {
   const [binCount, setBinCount] = useState('10')
   const [binCountry, setBinCountry] = useState('US')
   const [binSave, setBinSave] = useState(true)
+  const [binCheckLive, setBinCheckLive] = useState(true)
   const [binResult, setBinResult] = useState<any>(null)
   const [binLookup, setBinLookup] = useState<any>(null)
   const [generating, setGenerating] = useState(false)
@@ -82,6 +83,7 @@ export default function Vccs() {
           bin: binInput.trim(),
           count: parseInt(binCount) || 10,
           save_to_pool: binSave,
+          check_live: binCheckLive,
           billing_country: binCountry,
         }),
       })
@@ -168,10 +170,16 @@ export default function Vccs() {
                 <div className="grid grid-cols-3 gap-2">
                   <input className="input" placeholder="Count" value={binCount} onChange={e => setBinCount(e.target.value)} />
                   <input className="input" placeholder="Country" value={binCountry} onChange={e => setBinCountry(e.target.value)} />
-                  <label className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                    <input type="checkbox" checked={binSave} onChange={e => setBinSave(e.target.checked)} />
-                    Save to pool
-                  </label>
+                  <div className="flex flex-col gap-1">
+                    <label className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                      <input type="checkbox" checked={binSave} onChange={e => setBinSave(e.target.checked)} />
+                      Save to pool
+                    </label>
+                    <label className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                      <input type="checkbox" checked={binCheckLive} onChange={e => setBinCheckLive(e.target.checked)} />
+                      Check live
+                    </label>
+                  </div>
                 </div>
                 <Button size="sm" onClick={genCards} disabled={generating} className="w-full">
                   <Zap className={`h-4 w-4 mr-1.5 ${generating ? 'animate-spin' : ''}`} />
@@ -179,7 +187,7 @@ export default function Vccs() {
                 </Button>
                 {binResult && (
                   <div className={`text-xs p-2 rounded ${binResult.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                    {binResult.ok ? `Generated ${binResult.count} cards${binResult.saved ? ' (saved to pool)' : ''}` : binResult.error}
+                    {binResult.ok ? `Generated ${binResult.count} cards | Live: ${binResult.live ?? '?'} | Dead: ${binResult.dead ?? '?'}${binResult.saved ? ` | Saved: ${binResult.saved_count}` : ''}` : binResult.error}
                   </div>
                 )}
               </div>
