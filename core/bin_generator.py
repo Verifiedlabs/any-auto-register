@@ -141,27 +141,37 @@ def generate_cards(
     return cards
 
 
-def check_card_live(number: str, exp_month: int, exp_year: int, cvc: str) -> dict:
+def check_card_live(number: str, exp_month: int, exp_year: int, cvc: str, proxy_url: str = "") -> dict:
     try:
         exp_m = f"{int(exp_month):02d}"
         exp_y = str(exp_year)[-2:] if len(str(exp_year)) == 4 else str(exp_year)
         data = f"{number}|{exp_m}|{exp_y}|{cvc}"
-        resp = requests.post(
+        import urllib.request, json
+        body = json.dumps({"data": data}).encode()
+        req = urllib.request.Request(
             "https://api.chkr.cc/",
-            json={"data": data},
-            timeout=30,
+            data=body,
+            headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"},
         )
-        if resp.status_code == 200:
-            result = resp.json()
-            return {
-                "live": result.get("code") == 1,
-                "status": result.get("status", "Unknown"),
-                "message": result.get("message", ""),
-                "card_info": result.get("card", {}),
-            }
-        return {"live": False, "status": "error", "message": f"HTTP {resp.status_code}"}
+        if proxy_url:
+            proxy_handler = urllib.request.ProxyHandler({"http": proxy_url, "https": proxy_url})
+            opener = urllib.request.build_opener(proxy_handler)
+            with opener.open(req, timeout=30) as r:
+                result = json.loads(r.read())
+        else:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                result = json.loads(r.read())
+        return {
+            "live": result.get("code") == 1,
+            "status": result.get("status", "Unknown"),
+            "message": result.get("message", ""),
+            "card_info": result.get("card", {}),
+        }
     except Exception as e:
-        return {"live": False, "status": "error", "message": str(e)}
+        msg = str(e)
+        if "429" in msg:
+            return {"live": False, "status": "error", "message": "Rate limited - try again later"}
+        return {"live": False, "status": "error", "message": msg}
 
 
 def lookup_bin(bin_prefix: str) -> dict:

@@ -139,5 +139,15 @@ def generate_address(req: AddressGenerateRequest):
 
 @router.post("/check")
 def card_check(req: CardCheckRequest):
-    result = check_card_live(req.number, req.exp_month, req.exp_year, req.cvc)
+    from core.db import engine
+    from sqlmodel import Session as DbSession, select, text
+    proxy_url = ""
+    try:
+        with DbSession(engine) as s:
+            row = s.exec(text("SELECT url FROM proxies WHERE is_active = 1 ORDER BY RANDOM() LIMIT 1")).first()
+            if row:
+                proxy_url = row[0]
+    except:
+        pass
+    result = check_card_live(req.number, req.exp_month, req.exp_year, req.cvc, proxy_url=proxy_url)
     return {"ok": True, **result}
