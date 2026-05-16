@@ -3,13 +3,17 @@ import { apiFetch } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, RefreshCw, ToggleLeft, ToggleRight, Globe2, ShieldCheck, CircleOff, Activity } from 'lucide-react'
+import { Plus, Trash2, RefreshCw, ToggleLeft, ToggleRight, Globe2, ShieldCheck, CircleOff, Activity, Download } from 'lucide-react'
 
 export default function Proxies() {
   const [proxies, setProxies] = useState<any[]>([])
   const [newProxy, setNewProxy] = useState('')
   const [region, setRegion] = useState('')
   const [checking, setChecking] = useState(false)
+  const [fetchType, setFetchType] = useState('SOCKS5')
+  const [fetchLimit, setFetchLimit] = useState('100')
+  const [fetching, setFetching] = useState(false)
+  const [fetchResult, setFetchResult] = useState<any>(null)
 
   const load = () => apiFetch('/proxies').then(setProxies)
 
@@ -47,6 +51,22 @@ export default function Proxies() {
     setChecking(true)
     await apiFetch('/proxies/check', { method: 'POST' })
     setTimeout(() => { load(); setChecking(false) }, 3000)
+  }
+
+  const fetchProxies = async () => {
+    setFetching(true)
+    setFetchResult(null)
+    try {
+      const res = await apiFetch('/proxy-fetch/fetch', {
+        method: 'POST',
+        body: JSON.stringify({ proxy_type: fetchType, limit: parseInt(fetchLimit) || 100, save_to_pool: true }),
+      })
+      setFetchResult(res)
+      load()
+    } catch (e: any) {
+      setFetchResult({ ok: false, error: e.message })
+    }
+    setFetching(false)
   }
 
   const activeCount = proxies.filter((item) => item.is_active).length
@@ -120,6 +140,35 @@ export default function Proxies() {
             </Button>
           </div>
         </Card>
+
+        <div className="space-y-4">
+          <Card className="bg-[var(--bg-pane)]/60">
+            <div className="space-y-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Auto Fetch</div>
+                <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Fetch free proxies (325K+ available)</div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <select className="control-surface text-xs" value={fetchType} onChange={e => setFetchType(e.target.value)}>
+                  <option value="all">All Types</option>
+                  <option value="HTTP">HTTP</option>
+                  <option value="SOCKS4">SOCKS4</option>
+                  <option value="SOCKS5">SOCKS5</option>
+                </select>
+                <input className="control-surface text-xs" placeholder="Limit" value={fetchLimit} onChange={e => setFetchLimit(e.target.value)} />
+              </div>
+              <Button onClick={fetchProxies} disabled={fetching} className="w-full">
+                <Download className={`h-4 w-4 mr-1.5 ${fetching ? 'animate-spin' : ''}`} />
+                {fetching ? 'Fetching...' : 'Fetch & Save to Pool'}
+              </Button>
+              {fetchResult && (
+                <div className={`text-xs p-2 rounded ${fetchResult.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                  {fetchResult.ok ? `Fetched ${fetchResult.fetched} | Saved ${fetchResult.saved} new proxies` : fetchResult.error}
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
 
         <Card className="overflow-hidden p-0">
           <div className="border-b border-[var(--border)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]">
