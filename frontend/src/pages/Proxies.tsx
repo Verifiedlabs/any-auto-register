@@ -112,7 +112,7 @@ export default function Proxies() {
         ))}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,330px)_minmax(0,1fr)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,330px)_minmax(0,330px)]">
         <Card className="bg-[var(--bg-pane)]/60">
           <div className="space-y-4">
             <div>
@@ -123,7 +123,7 @@ export default function Proxies() {
               value={newProxy}
               onChange={e => setNewProxy(e.target.value)}
               placeholder="http://user:pass@host:port"
-              rows={8}
+              rows={6}
               className="control-surface control-surface-mono resize-none"
             />
             <input
@@ -132,9 +132,6 @@ export default function Proxies() {
                placeholder="Region tag (e.g., US, SG)"
               className="control-surface"
             />
-            <div className="rounded-lg border border-[var(--border-soft)] bg-[var(--bg-pane)]/45 px-3.5 py-2.5 text-xs leading-5 text-[var(--text-secondary)]">
-               Supports single proxy entry or multi-line bulk import. Region tags will be saved for filtering and entry/exit identification.
-            </div>
             <Button onClick={add} className="w-full">
                <Plus className="h-4 w-4 mr-1.5" />
                Add to Proxy Pool
@@ -142,86 +139,90 @@ export default function Proxies() {
           </div>
         </Card>
 
-        <div className="space-y-4">
-          <Card className="bg-[var(--bg-pane)]/60">
-            <div className="space-y-3">
-              <div>
-                <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Auto Fetch</div>
-                <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Fetch free proxies (325K+ available)</div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <select className="control-surface text-xs" value={fetchType} onChange={e => setFetchType(e.target.value)}>
-                  <option value="all">All Types</option>
-                  <option value="HTTP">HTTP</option>
-                  <option value="SOCKS4">SOCKS4</option>
-                  <option value="SOCKS5">SOCKS5</option>
-                </select>
-                <input className="control-surface text-xs" placeholder="Limit" value={fetchLimit} onChange={e => setFetchLimit(e.target.value)} />
-              </div>
-              <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                <input type="checkbox" checked={fetchCheckAlive} onChange={e => setFetchCheckAlive(e.target.checked)} />
-                Check alive before saving
-              </label>
-              <Button onClick={fetchProxies} disabled={fetching} className="w-full">
-                <Download className={`h-4 w-4 mr-1.5 ${fetching ? 'animate-spin' : ''}`} />
-                {fetching ? 'Fetching...' : 'Fetch & Save to Pool'}
-              </Button>
-              {fetchResult && (
-                <div className={`text-xs p-2 rounded ${fetchResult.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                  {fetchResult.ok ? `Fetched ${fetchResult.fetched} | Saved ${fetchResult.saved} new proxies` : fetchResult.error}
-                </div>
-              )}
+        <Card className="bg-[var(--bg-pane)]/60">
+          <div className="space-y-3">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Auto Fetch</div>
+              <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Fetch free proxies (325K+ available)</div>
             </div>
-          </Card>
-        </div>
-
-        <Card className="overflow-hidden p-0">
-          <div className="border-b border-[var(--border)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]">
-            Proxy List
+            <div className="grid grid-cols-2 gap-2">
+              <select className="control-surface text-xs" value={fetchType} onChange={e => setFetchType(e.target.value)}>
+                <option value="all">All Types</option>
+                <option value="HTTP">HTTP</option>
+                <option value="SOCKS4">SOCKS4</option>
+                <option value="SOCKS5">SOCKS5</option>
+              </select>
+              <input className="control-surface text-xs" placeholder="Limit" value={fetchLimit} onChange={e => setFetchLimit(e.target.value)} />
+            </div>
+            <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+              <input type="checkbox" checked={fetchCheckAlive} onChange={e => setFetchCheckAlive(e.target.checked)} />
+              Check alive before saving
+            </label>
+            <Button onClick={fetchProxies} disabled={fetching} className="w-full">
+              <Download className={`h-4 w-4 mr-1.5 ${fetching ? 'animate-spin' : ''}`} />
+              {fetching ? 'Fetching...' : 'Fetch & Save to Pool'}
+            </Button>
+            {fetchResult && (
+              <div className={`text-xs p-2 rounded ${fetchResult.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                {fetchResult.ok ? `Fetched ${fetchResult.fetched} | Saved ${fetchResult.saved} new proxies` : fetchResult.error}
+              </div>
+            )}
           </div>
-        <div className="glass-table-wrap">
-        <table className="w-full min-w-[760px] text-sm">
+        </Card>
+      </div>
+
+      <Card className="overflow-x-auto p-0">
+        <div className="border-b border-[var(--border)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]">
+          Proxy List
+        </div>
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[var(--border)] text-[var(--text-muted)]">
+            <tr className="border-b border-[var(--border)] text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
               <th className="px-4 py-2.5 text-left">Proxy Address</th>
-               <th className="px-4 py-2.5 text-left">Region</th>
-               <th className="px-4 py-2.5 text-left">Success/Failed</th>
-               <th className="px-4 py-2.5 text-left">Status</th>
-               <th className="px-4 py-2.5 text-left">Actions</th>
+              <th className="px-4 py-2.5 text-left">Region</th>
+              <th className="px-4 py-2.5 text-left">Success/Failed</th>
+              <th className="px-4 py-2.5 text-left">Status</th>
+              <th className="px-4 py-2.5 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {proxies.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8">
-                  <div className="empty-state-panel">Proxy pool is empty. You can add one or bulk import from the left.</div>
-                </td>
+                <td colSpan={5} className="px-4 py-8 text-center text-sm text-[var(--text-muted)]">Proxy pool is empty</td>
               </tr>
             )}
             {proxies.map(p => (
               <tr key={p.id} className="border-b border-[var(--border)]/40 hover:bg-[var(--bg-hover)]/70">
-                <td className="px-4 py-2.5 font-mono text-xs text-[var(--text-secondary)]">{p.url}</td>
-                <td className="px-4 py-2.5 text-[var(--text-muted)]">{p.region || '-'}</td>
-                <td className="px-4 py-2.5">
+                <td className="px-4 py-2.5 font-mono text-xs break-all">{p.url}</td>
+                <td className="px-4 py-2.5 text-xs">{p.region || '-'}</td>
+                <td className="px-4 py-2.5 text-xs">
                   <span className="text-emerald-400">{p.success_count}</span>
                   <span className="text-[var(--text-muted)]"> / </span>
                   <span className="text-red-400">{p.fail_count}</span>
                 </td>
                 <td className="px-4 py-2.5">
-                   <Badge variant={p.is_active ? 'success' : 'danger'}>
-                     {p.is_active ? 'Active' : 'Disabled'}
-                   </Badge>
+                  <Badge variant={p.is_active ? 'success' : 'danger'}>
+                    {p.is_active ? 'Active' : 'Disabled'}
+                  </Badge>
                 </td>
                 <td className="px-4 py-2.5">
                   <div className="flex items-center gap-2">
                     <button onClick={() => toggle(p.id)} className="table-action-btn">
-                      {p.is_active ? <ToggleRight className="mr-1.5 h-4 w-4" /> : <ToggleLeft className="mr-1.5 h-4 w-4" />}
-                      {p.is_active ? 'Disable' : 'Enable'}
+                      {p.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
                     </button>
                     <button onClick={() => del(p.id)} className="table-action-btn table-action-btn-danger">
-                      <Trash2 className="mr-1.5 h-4 w-4" />
-                       Delete
+                      <Trash2 className="h-4 w-4" />
                     </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  )
+}
                   </div>
                 </td>
               </tr>
