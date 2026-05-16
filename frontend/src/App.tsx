@@ -14,6 +14,7 @@ import UpdateBanner from '@/components/UpdateBanner'
 import {
   ChevronRight,
   CreditCard,
+  Globe2,
   History,
   LayoutDashboard,
   Zap,
@@ -37,6 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/history', label: 'Tasks', icon: History },
   { path: '/vccs', label: 'VCC Pool', icon: CreditCard },
   { path: '/upgrade', label: 'Upgrade', icon: Zap },
+  { path: '/proxies', label: 'Proxies', icon: Globe2 },
 ]
 
 function Sidebar({
