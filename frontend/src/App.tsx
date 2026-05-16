@@ -7,6 +7,7 @@ import Accounts from '@/pages/Accounts'
 import Register from '@/pages/Register'
 import Proxies from '@/pages/Proxies'
 import Vccs from '@/pages/Vccs'
+import Upgrade from '@/pages/Upgrade'
 import SettingsPage from '@/pages/SettingsPage'
 import TaskHistory from '@/pages/TaskHistory'
 import UpdateBanner from '@/components/UpdateBanner'
@@ -15,6 +16,7 @@ import {
   CreditCard,
   History,
   LayoutDashboard,
+  Zap,
   Moon,
   Settings as SettingsIcon,
   Sun,
@@ -34,6 +36,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Overview', icon: LayoutDashboard, exact: true },
   { path: '/history', label: 'Tasks', icon: History },
   { path: '/vccs', label: 'VCC Pool', icon: CreditCard },
+  { path: '/upgrade', label: 'Upgrade', icon: Zap },
 ]
 
 function Sidebar({
@@ -273,6 +276,7 @@ function Shell({
             <Route path="/history" element={<TaskHistory />} />
             <Route path="/proxies" element={<Proxies />} />
             <Route path="/vccs" element={<Vccs />} />
+            <Route path="/upgrade" element={<Upgrade />} />
             <Route path="/settings" element={<SettingsPage theme={theme} setTheme={setTheme} />} />
           </Routes>
         </div>
