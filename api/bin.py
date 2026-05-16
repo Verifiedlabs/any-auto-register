@@ -45,8 +45,15 @@ def bin_generate(req: BinGenerateRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    bin_country = ""
+    bin_info = lookup_bin(req.bin)
+    if bin_info.get("country"):
+        bin_country = bin_info["country"]
+    if not bin_country:
+        bin_country = req.billing_country or "US"
+
     if req.save_to_pool and cards:
-        billing = generate_billing_address(req.billing_country)
+        billing = generate_billing_address(bin_country)
         with Session(engine) as s:
             for card in cards:
                 vcc = VccModel(
@@ -55,7 +62,7 @@ def bin_generate(req: BinGenerateRequest):
                     exp_year=card["expYear"],
                     cvc=card["cvc"],
                     billing_name=billing.get("name", "Generated User"),
-                    billing_country=req.billing_country,
+                    billing_country=bin_country,
                     billing_line1=billing.get("line1", ""),
                     billing_city=billing.get("city", ""),
                     billing_state=billing.get("state", ""),
