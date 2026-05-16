@@ -70,6 +70,25 @@ export default function Proxies() {
     setFetching(false)
   }
 
+  const deleteAll = async () => {
+    if (!confirm('Delete all proxies?')) return
+    for (const p of proxies) {
+      await apiFetch(`/proxies/${p.id}`, { method: 'DELETE' })
+    }
+    load()
+  }
+
+  const downloadProxies = () => {
+    const text = proxies.map(p => p.url).join('\n')
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `proxies_${new Date().toISOString().slice(0,10)}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const activeCount = proxies.filter((item) => item.is_active).length
   const totalSuccess = proxies.reduce((sum, item) => sum + Number(item.success_count || 0), 0)
   const totalFail = proxies.reduce((sum, item) => sum + Number(item.fail_count || 0), 0)
@@ -92,6 +111,14 @@ export default function Proxies() {
           <Button variant="outline" size="sm" onClick={check} disabled={checking}>
              <RefreshCw className={`h-4 w-4 mr-1.5 ${checking ? 'animate-spin' : ''}`} />
              Check All
+          </Button>
+          <Button variant="outline" size="sm" onClick={downloadProxies}>
+             <Download className="h-4 w-4 mr-1.5" />
+             Download
+          </Button>
+          <Button variant="outline" size="sm" onClick={deleteAll} className="text-red-400 hover:text-red-300">
+             <Trash2 className="h-4 w-4 mr-1.5" />
+             Delete All
           </Button>
         </div>
       </Card>
