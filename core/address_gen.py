@@ -119,8 +119,3 @@ def generate_billing_address_for_vcc(vcc: dict) -> dict:
     generated = generate_billing_address("US")
     billing.update({k: v for k, v in generated.items() if not billing.get(k)})
     return billing
-
-
-    generated = generate_billing_address(country)
-    billing.update({k: v for k, v in generated.items() if not billing.get(k)})
-    return billing

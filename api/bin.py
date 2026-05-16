@@ -27,6 +27,11 @@ class BinLookupRequest(BaseModel):
     bin: str
 
 
+class AddressGenerateRequest(BaseModel):
+    country: str = "US"
+    count: int = 1
+
+
 @router.post("/generate")
 def bin_generate(req: BinGenerateRequest):
     try:
@@ -76,3 +81,12 @@ def bin_lookup(req: BinLookupRequest):
 def bin_validate(number: str):
     cleaned = ''.join(c for c in number if c.isdigit())
     return {"ok": True, "valid": luhn_valid(cleaned), "number": cleaned}
+
+
+@router.post("/address")
+def generate_address(req: AddressGenerateRequest):
+    addresses = []
+    for _ in range(min(req.count, 20)):
+        addr = generate_billing_address(req.country)
+        addresses.append(addr)
+    return {"ok": True, "addresses": addresses, "count": len(addresses)}
