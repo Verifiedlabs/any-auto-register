@@ -8,6 +8,7 @@ import Register from '@/pages/Register'
 import Proxies from '@/pages/Proxies'
 import Vccs from '@/pages/Vccs'
 import Upgrade from '@/pages/Upgrade'
+import Checker from '@/pages/Checker'
 import SettingsPage from '@/pages/SettingsPage'
 import TaskHistory from '@/pages/TaskHistory'
 import UpdateBanner from '@/components/UpdateBanner'
@@ -17,6 +18,7 @@ import {
   Globe2,
   History,
   LayoutDashboard,
+  ShieldCheck,
   Zap,
   Moon,
   Settings as SettingsIcon,
@@ -37,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/', label: 'Overview', icon: LayoutDashboard, exact: true },
   { path: '/history', label: 'Tasks', icon: History },
   { path: '/vccs', label: 'VCC Pool', icon: CreditCard },
+  { path: '/checker', label: 'Checker', icon: ShieldCheck },
   { path: '/upgrade', label: 'Upgrade', icon: Zap },
   { path: '/proxies', label: 'Proxies', icon: Globe2 },
 ]
@@ -278,6 +281,7 @@ function Shell({
             <Route path="/history" element={<TaskHistory />} />
             <Route path="/proxies" element={<Proxies />} />
             <Route path="/vccs" element={<Vccs />} />
+            <Route path="/checker" element={<Checker />} />
             <Route path="/upgrade" element={<Upgrade />} />
             <Route path="/settings" element={<SettingsPage theme={theme} setTheme={setTheme} />} />
           </Routes>

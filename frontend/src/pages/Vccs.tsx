@@ -190,10 +190,6 @@ export default function Vccs() {
                     {binResult.ok ? `Generated ${binResult.count} cards | Live: ${binResult.live ?? '?'} | Dead: ${binResult.dead ?? '?'}${binResult.errors ? ` | Errors: ${binResult.errors}` : ''}${binResult.saved ? ` | Saved: ${binResult.saved_count}` : ''}` : binResult.error}
                   </div>
                 )}
-                <div className="border-t border-[var(--border-soft)] pt-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)] mb-2">Card Checker (chkr.cc)</div>
-                  <iframe src="https://chkr.cc" className="w-full h-[500px] rounded border border-[var(--border-soft)]" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" />
-                </div>
               </div>
             </div>
           </Card>
