@@ -62,6 +62,7 @@ from api.tasks import router as tasks_router
 from api.vccs import router as vccs_router
 from api.bin import router as bin_router
 from api.upgrade import router as upgrade_router
+from api.proxy_fetch import router as proxy_fetch_router
 from core.db import init_db
 from core.registry import load_all
 from providers.registry import load_all as load_providers
@@ -125,6 +126,7 @@ app.include_router(system_router, prefix="/api")
 app.include_router(vccs_router, prefix="/api")
 app.include_router(bin_router, prefix="/api")
 app.include_router(upgrade_router, prefix="/api")
+app.include_router(proxy_fetch_router, prefix="/api")
 
 
 _static_dir = os.path.join(os.path.dirname(__file__), "static")
