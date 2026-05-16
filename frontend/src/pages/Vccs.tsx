@@ -3,7 +3,7 @@ import { apiFetch } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, CreditCard, CheckCircle, XCircle, Clock, Search, Zap, Eye, EyeOff } from 'lucide-react'
+import { Plus, Trash2, CreditCard, CheckCircle, XCircle, Clock, Search, Zap, Eye, EyeOff, Copy } from 'lucide-react'
 
 export default function Vccs() {
   const [vccs, setVccs] = useState<any[]>([])
@@ -125,6 +125,14 @@ export default function Vccs() {
             <Badge variant="default">Total {vccs.length}</Badge>
             <Badge variant="secondary">Active {activeCount}</Badge>
           </div>
+          <Button variant="outline" size="sm" onClick={async () => {
+            const details = await Promise.all(vccs.map(v => apiFetch(`/vccs/${v.id}`).then((d: any) => d.vcc || d)))
+            const text = details.map(d => `${d.number}|${String(d.exp_month).padStart(2,'0')}|${d.exp_year}|${d.cvc}`).join('\n')
+            navigator.clipboard.writeText(text)
+          }}>
+            <Copy className="h-4 w-4 mr-1.5" />
+            Copy All
+          </Button>
         </div>
       </Card>
 
