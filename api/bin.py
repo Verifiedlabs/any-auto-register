@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from core.bin_generator import generate_cards, lookup_bin, luhn_valid, check_card_live
-from core.address_gen import generate_billing_address
+from core.address_gen import generate_billing_address, generate_holder_name
 from core.db import VccModel, engine
 from sqlmodel import Session
 
@@ -80,12 +80,13 @@ def bin_generate(req: BinGenerateRequest):
         billing = generate_billing_address(bin_country)
         with Session(engine) as s:
             for card in cards_to_save:
+                holder_name = generate_holder_name(bin_country)
                 vcc = VccModel(
                     number=card["number"],
                     exp_month=card["expMonth"],
                     exp_year=card["expYear"],
                     cvc=card["cvc"],
-                    billing_name=billing.get("name", "Generated User"),
+                    billing_name=holder_name,
                     billing_country=bin_country,
                     billing_line1=billing.get("line1", ""),
                     billing_city=billing.get("city", ""),

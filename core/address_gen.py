@@ -8,6 +8,35 @@ import requests
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 
+NAMES_BY_COUNTRY: dict[str, dict[str, list[str]]] = {
+    "US": {"first": ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Christopher", "Mary", "Patricia", "Jennifer", "Linda", "Barbara", "Elizabeth", "Susan", "Jessica", "Sarah", "Karen"], "last": ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Wilson", "Anderson", "Taylor", "Thomas", "Moore"]},
+    "KR": {"first": ["Minjun", "Seojun", "Jiwon", "Yuna", "Soyeon", "Jihye", "Hyunwoo", "Donghyun", "Eunji", "Subin", "Jimin", "Taehyung", "Soojin", "Haeun", "Doyeon"], "last": ["Kim", "Lee", "Park", "Choi", "Jung", "Kang", "Cho", "Yoon", "Jang", "Lim", "Han", "Oh", "Seo", "Shin", "Kwon"]},
+    "JP": {"first": ["Haruto", "Yuto", "Sota", "Hinata", "Yui", "Sakura", "Aoi", "Hana", "Ren", "Minato", "Kaito", "Riku", "Mei", "Koharu", "Akari"], "last": ["Sato", "Suzuki", "Takahashi", "Tanaka", "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada", "Sasaki", "Yamaguchi", "Matsumoto"]},
+    "GB": {"first": ["Oliver", "George", "Harry", "Jack", "Noah", "Olivia", "Amelia", "Isla", "Ava", "Emily", "James", "William", "Thomas", "Charlotte", "Sophie"], "last": ["Smith", "Jones", "Williams", "Taylor", "Brown", "Davies", "Evans", "Wilson", "Thomas", "Roberts", "Johnson", "Walker", "Wright", "Robinson", "Thompson"]},
+    "AU": {"first": ["Oliver", "Noah", "Jack", "William", "Leo", "Charlotte", "Olivia", "Amelia", "Isla", "Mia", "James", "Thomas", "Henry", "Ella", "Grace"], "last": ["Smith", "Jones", "Williams", "Brown", "Wilson", "Taylor", "Johnson", "White", "Martin", "Anderson", "Thompson", "Thomas", "Walker", "Harris", "Lee"]},
+    "CA": {"first": ["Liam", "Noah", "Oliver", "James", "Lucas", "Olivia", "Emma", "Charlotte", "Amelia", "Sophia", "Benjamin", "Ethan", "William", "Mia", "Ava"], "last": ["Smith", "Brown", "Tremblay", "Martin", "Roy", "Wilson", "Gagnon", "Taylor", "Lee", "Johnson", "Campbell", "Anderson", "MacDonald", "Thompson", "White"]},
+    "SG": {"first": ["Wei Jie", "Jun Kai", "Yi Xuan", "Jia Yi", "Zhi Hao", "Hui Min", "Jia Wen", "Yu Xuan", "Zi Xuan", "Jia Le"], "last": ["Tan", "Lim", "Lee", "Ng", "Wong", "Goh", "Chua", "Chan", "Ong", "Teo"]},
+    "DE": {"first": ["Maximilian", "Alexander", "Paul", "Leon", "Louis", "Marie", "Sophie", "Maria", "Emma", "Hannah", "Felix", "Lukas", "Jonas", "Anna", "Lena"], "last": ["Mueller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann"]},
+    "FR": {"first": ["Gabriel", "Louis", "Raphael", "Jules", "Adam", "Emma", "Jade", "Louise", "Alice", "Chloe", "Lucas", "Hugo", "Arthur", "Lea", "Manon"], "last": ["Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand", "Leroy", "Moreau"]},
+    "ID": {"first": ["Budi", "Andi", "Dian", "Siti", "Rina", "Agus", "Dewi", "Putri", "Rizky", "Fajar", "Ayu", "Wati", "Hendra", "Indra", "Mega"], "last": ["Wijaya", "Susanto", "Hidayat", "Pratama", "Saputra", "Nugroho", "Santoso", "Kurniawan", "Setiawan", "Wibowo"]},
+    "IN": {"first": ["Aarav", "Vivaan", "Aditya", "Vihaan", "Arjun", "Ananya", "Diya", "Priya", "Isha", "Kavya", "Rahul", "Amit", "Neha", "Pooja", "Ravi"], "last": ["Sharma", "Patel", "Singh", "Kumar", "Gupta", "Reddy", "Joshi", "Verma", "Mehta", "Shah"]},
+    "TR": {"first": ["Yusuf", "Eymen", "Omer", "Elif", "Zeynep", "Defne", "Miran", "Kerem", "Asya", "Azra", "Mehmet", "Ali", "Fatma", "Ayse", "Mustafa"], "last": ["Yilmaz", "Kaya", "Demir", "Celik", "Sahin", "Ozturk", "Yildiz", "Aydin", "Ozdemir", "Arslan"]},
+    "NL": {"first": ["Noah", "Sem", "Liam", "Lucas", "Daan", "Emma", "Julia", "Mila", "Sophie", "Tess", "Finn", "Luuk", "Milan", "Eva", "Anna"], "last": ["De Jong", "Jansen", "De Vries", "Van den Berg", "Van Dijk", "Bakker", "Janssen", "Visser", "Smit", "Meijer"]},
+    "BR": {"first": ["Miguel", "Arthur", "Heitor", "Helena", "Alice", "Laura", "Theo", "Davi", "Gabriel", "Valentina", "Pedro", "Lucas", "Maria", "Julia", "Ana"], "last": ["Silva", "Santos", "Oliveira", "Souza", "Rodrigues", "Ferreira", "Alves", "Pereira", "Lima", "Gomes"]},
+    "MX": {"first": ["Santiago", "Mateo", "Sebastian", "Matias", "Sofia", "Valentina", "Regina", "Camila", "Diego", "Leonardo", "Carlos", "Maria", "Jose", "Ana", "Luis"], "last": ["Hernandez", "Garcia", "Martinez", "Lopez", "Gonzalez", "Rodriguez", "Perez", "Sanchez", "Ramirez", "Torres"]},
+    "PH": {"first": ["James", "John", "Mark", "Angel", "Princess", "Joshua", "Daniel", "Andrea", "Nicole", "Christian", "Michael", "Mary", "Jose", "Maria", "Juan"], "last": ["Santos", "Reyes", "Cruz", "Bautista", "Del Rosario", "Gonzales", "Ramos", "Aquino", "Garcia", "Mendoza"]},
+    "TH": {"first": ["Somchai", "Somsak", "Somporn", "Siriporn", "Siriwan", "Nattapong", "Piyapong", "Kannika", "Pornpan", "Wanida"], "last": ["Saetang", "Wongsawat", "Srisuk", "Thongdee", "Kaewsai", "Boonmee", "Chaiyasit", "Rattanakorn", "Phanich", "Suwannarat"]},
+    "VN": {"first": ["Minh", "Huy", "Duc", "Anh", "Linh", "Trang", "Hoa", "Thao", "Nam", "Tuan", "Hung", "Lan", "Mai", "Phuong", "Thanh"], "last": ["Nguyen", "Tran", "Le", "Pham", "Hoang", "Huynh", "Phan", "Vu", "Vo", "Dang"]},
+    "MY": {"first": ["Ahmad", "Muhammad", "Nur", "Siti", "Mohd", "Amir", "Aisyah", "Fatimah", "Hafiz", "Nurul"], "last": ["Abdullah", "Rahman", "Hassan", "Ibrahim", "Ismail", "Ali", "Ahmad", "Yusof", "Omar", "Aziz"]},
+    "HK": {"first": ["Ka Fai", "Wai Man", "Chi Wai", "Wing Yan", "Hoi Yan", "Tsz Hin", "Hoi Lam", "Tsz Yan", "Ka Ho", "Lok Yin"], "last": ["Chan", "Wong", "Leung", "Lau", "Cheung", "Li", "Ng", "Ho", "Tam", "Kwok"]},
+}
+
+
+def generate_holder_name(country: str = "US") -> str:
+    country = country.upper()
+    names = NAMES_BY_COUNTRY.get(country, NAMES_BY_COUNTRY["US"])
+    return f"{random.choice(names['first'])} {random.choice(names['last'])}"
+
 US_CITY_QUERIES = [
     ("New York", "NY", "office building Manhattan New York"),
     ("New York", "NY", "office building Brooklyn New York"),
