@@ -450,6 +450,30 @@ class KiroRegister:
         self.log(f"  2a view: {view_url[:120]}")
         p=urlparse(view_url); qs=parse_qs(p.query)
         fqs=parse_qs(p.fragment.lstrip("#/?")) if p.fragment else {}
+        # ★ New flow: signin.aws directly includes workflowStateHandle
+        wsh_direct=(qs.get("workflowStateHandle") or fqs.get("workflowStateHandle",[None]))[0]
+        if wsh_direct:
+            self.wsh=wsh_direct; self._login_wsh=self.wsh
+            self.log(f"  ✅ wsh (direct)={self.wsh}")
+            self._capture_cookies(r)
+            self._setup_signin_js_cookies()
+            # Fetch portal csrf token (needed for step 12)
+            vr="https://view.awsapps.com/start/#/?orchestrator_id=dummy"
+            pu=(f"https://portal.sso.us-east-1.amazonaws.com/login"
+                f"?directory_id=view&redirect_url={url_quote(vr)}")
+            r2=self.s.get(pu,headers={**UA,"accept":"*/*",
+                "origin":"https://view.awsapps.com",
+                "referer":"https://view.awsapps.com/",
+                "sec-fetch-site":"cross-site","sec-fetch-mode":"cors",
+                "sec-fetch-dest":"empty"},allow_redirects=False)
+            try:
+                d=r2.json()
+                csrf=d.get("csrfToken")
+                if csrf:
+                    self._portal_csrf_token=str(csrf)
+                    self.log(f"  ★ portal csrfToken={self._portal_csrf_token}")
+            except: pass
+            return True
         oid=(qs.get("orchestrator_id") or fqs.get("orchestrator_id",[None]))[0]
         cb=(qs.get("callback_url") or fqs.get("callback_url",[None]))[0]
         if not oid: self.log("  ❌ 无orchestrator_id"); return False

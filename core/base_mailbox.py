@@ -219,6 +219,16 @@ def _create_cfworker(extra: dict, proxy: str | None) -> 'BaseMailbox':
     )
 
 
+def _create_tempmail_malghz(extra: dict, proxy: str | None) -> 'BaseMailbox':
+    from providers.mailbox.tempmail_malghz import TempMailMalghzMailbox
+    return TempMailMalghzMailbox(
+        api_url=extra.get("tempmail_malghz_api_url", "https://tempmail.malghz.my.id"),
+        domain=extra.get("tempmail_malghz_domain", "malghz.my.id"),
+        admin_token=extra.get("tempmail_malghz_admin_token", ""),
+        proxy=proxy,
+    )
+
+
 def _create_testmail(extra: dict, proxy: str | None) -> 'BaseMailbox':
     return TestmailMailbox(
         api_url=extra.get("testmail_api_url", ""),
@@ -269,6 +279,7 @@ MAILBOX_FACTORY_REGISTRY = {
     "freemail_api": _create_freemail,
     "moemail_api": _create_moemail,
     "cfworker_admin_api": _create_cfworker,
+    "tempmail_malghz": _create_tempmail_malghz,
     "testmail_api": _create_testmail,
     "local_ms_pool": _create_local_ms_pool,
     "laoudo_api": _create_laoudo,

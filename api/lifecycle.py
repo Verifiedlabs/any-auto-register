@@ -29,7 +29,7 @@ class WarningRequest(BaseModel):
 
 @router.post("/check")
 def trigger_validity_check(body: CheckRequest):
-    """手动触发账号有效性批量检测。"""
+    """Manually trigger batch account validity check."""
     results = check_accounts_validity(platform=body.platform, limit=body.limit)
     return {"ok": True, "data": results}
 

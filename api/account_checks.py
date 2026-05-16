@@ -17,5 +17,5 @@ def check_all_accounts(platform: str = ""):
 def check_account(account_id: int):
     result = service.check_one_async(account_id)
     if not result:
-        raise HTTPException(404, "账号不存在")
+        raise HTTPException(404, "Account not found")
     return result

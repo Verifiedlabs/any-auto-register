@@ -9,6 +9,7 @@ protobuf wire 编解码。
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable
@@ -505,6 +506,8 @@ class WindsurfClient:
                 "name": name,
             },
         )
+        self.log(f"[DEBUG] email/complete response keys: {list(data.keys())}")
+        self.log(f"[DEBUG] email/complete response: {json.dumps({k: v for k, v in data.items() if 'token' in k.lower() or 'auth' in k.lower()})}")
         auth_token = _as_text(data.get("token"))
         if not auth_token:
             raise RuntimeError("Windsurf 未返回 auth token")
@@ -531,15 +534,20 @@ class WindsurfClient:
         auth_token = _as_text(data.get("token"))
         if not auth_token:
             raise RuntimeError("Windsurf 密码登录未返回 auth token")
-        return self.post_auth(auth_token)
+        auth1_token = _as_text(data.get("auth1_token") or data.get("authToken1") or "")
+        return self.post_auth(auth_token, auth1_token=auth1_token)
 
-    def post_auth(self, auth_token: str) -> dict[str, str]:
+    def post_auth(self, auth_token: str, *, auth1_token: str = "") -> dict[str, str]:
         self.log("Step3: 兑换 Windsurf session")
         content = self._proto_post(
             "WindsurfPostAuth",
             _field_string(1, auth_token),
             referer="/account/register",
+            auth1_token=auth1_token,
         )
+        self.log(f"[DEBUG] WindsurfPostAuth raw response hex: {content.hex()[:200]}")
+        data = parse_post_auth_response(content)
+        self.log(f"[DEBUG] WindsurfPostAuth parsed: {data}")
         data = parse_post_auth_response(content)
         if not data.get("session_token"):
             raise RuntimeError("Windsurf 未返回 session_token")
@@ -551,31 +559,37 @@ class WindsurfClient:
             body += _field_varint(2, 1)
         return body
 
-    def get_current_user(self, session_token: str, *, account_id: str = "", org_id: str = "") -> dict[str, Any]:
+    def get_current_user(self, session_token: str, *, account_id: str = "", org_id: str = "", auth1_token: str = "") -> dict[str, Any]:
         content = self._proto_post(
             "GetCurrentUser",
             self._auth_body(session_token),
             account_id=account_id,
             org_id=org_id,
+            session_token=session_token,
+            auth1_token=auth1_token,
         )
         return parse_current_user_response(content)
 
-    def get_plan_status(self, session_token: str, *, account_id: str = "", org_id: str = "") -> dict[str, Any]:
+    def get_plan_status(self, session_token: str, *, account_id: str = "", org_id: str = "", auth1_token: str = "") -> dict[str, Any]:
         content = self._proto_post(
             "GetPlanStatus",
             self._auth_body(session_token, include_plan_status_flag=True),
             account_id=account_id,
             org_id=org_id,
+            session_token=session_token,
+            auth1_token=auth1_token,
             referer="/subscription/usage",
         )
         return parse_plan_status_response(content)
 
-    def get_stripe_subscription_state(self, session_token: str, *, account_id: str = "", org_id: str = "") -> dict[str, Any]:
+    def get_stripe_subscription_state(self, session_token: str, *, account_id: str = "", org_id: str = "", auth1_token: str = "") -> dict[str, Any]:
         content = self._proto_post(
             "GetStripeSubscriptionState",
             self._auth_body(session_token),
             account_id=account_id,
             org_id=org_id,
+            session_token=session_token,
+            auth1_token=auth1_token,
             referer="/subscription/manage-plan",
         )
         return parse_stripe_subscription_state(content)
@@ -631,14 +645,14 @@ class WindsurfClient:
             raise RuntimeError("Windsurf SubscribeToPlan 未返回 checkout_url")
         return result
 
-    def load_account_state(self, *, session_token: str, account_id: str = "", org_id: str = "", fallback_email: str = "") -> dict[str, Any]:
+    def load_account_state(self, *, session_token: str, account_id: str = "", org_id: str = "", fallback_email: str = "", auth1_token: str = "") -> dict[str, Any]:
         if not session_token:
             raise RuntimeError("账号缺少 Windsurf session_token")
-        current_user = self.get_current_user(session_token, account_id=account_id, org_id=org_id)
-        plan_status = self.get_plan_status(session_token, account_id=account_id, org_id=org_id)
+        current_user = self.get_current_user(session_token, account_id=account_id, org_id=org_id, auth1_token=auth1_token)
+        plan_status = self.get_plan_status(session_token, account_id=account_id, org_id=org_id, auth1_token=auth1_token)
         stripe_state: dict[str, Any] = {}
         try:
-            stripe_state = self.get_stripe_subscription_state(session_token, account_id=account_id, org_id=org_id)
+            stripe_state = self.get_stripe_subscription_state(session_token, account_id=account_id, org_id=org_id, auth1_token=auth1_token)
         except Exception as exc:
             stripe_state = {"error": str(exc)}
         state = {

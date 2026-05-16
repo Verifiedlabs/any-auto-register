@@ -35,14 +35,14 @@ def create_register_task(body: RegisterTaskRequest):
 def cancel_task(task_id: str):
     task = command_service.cancel_task(task_id)
     if not task:
-        raise HTTPException(404, "任务不存在")
+        raise HTTPException(404, "Task not found")
     return task
 
 
 @router.get("/{task_id}/logs/stream")
 async def stream_logs(task_id: str, since: int = 0):
     if not query_service.get_task(task_id):
-        raise HTTPException(404, "任务不存在")
+        raise HTTPException(404, "Task not found")
     return StreamingResponse(
         command_service.stream_task_events(task_id, since=since),
         media_type="text/event-stream",

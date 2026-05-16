@@ -17,7 +17,7 @@ def list_tasks(platform: str = "", status: str = "", page: int = 1, page_size: i
 def get_task(task_id: str):
     task = service.get_task(task_id)
     if not task:
-        raise HTTPException(404, "任务不存在")
+        raise HTTPException(404, "Task not found")
     return task
 
 
@@ -25,5 +25,5 @@ def get_task(task_id: str):
 def list_task_events(task_id: str, since: int = 0, limit: int = 200):
     task = service.get_task(task_id)
     if not task:
-        raise HTTPException(404, "任务不存在")
+        raise HTTPException(404, "Task not found")
     return service.list_events(task_id, since=since, limit=limit)

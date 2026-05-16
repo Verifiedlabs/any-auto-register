@@ -48,5 +48,5 @@ def delete_provider_definition(definition_id: int):
     except ValueError as exc:
         raise HTTPException(400, str(exc))
     if not result["ok"]:
-        raise HTTPException(404, "provider definition 不存在")
+        raise HTTPException(404, "provider definition not found")
     return result

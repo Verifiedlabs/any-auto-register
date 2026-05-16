@@ -29,7 +29,7 @@ def list_proxies():
 def create_proxy(body: ProxyCreateRequest):
     item = service.create_proxy(ProxyCreateCommand(url=body.url, region=body.region))
     if not item:
-        raise HTTPException(400, "代理已存在")
+        raise HTTPException(400, "Proxy already exists")
     return item
 
 
@@ -42,7 +42,7 @@ def bulk_create_proxies(body: ProxyBulkCreateRequest):
 def delete_proxy(proxy_id: int):
     result = service.delete_proxy(proxy_id)
     if not result["ok"]:
-        raise HTTPException(404, "代理不存在")
+        raise HTTPException(404, "Proxy not found")
     return result
 
 
@@ -50,7 +50,7 @@ def delete_proxy(proxy_id: int):
 def toggle_proxy(proxy_id: int):
     result = service.toggle_proxy(proxy_id)
     if not result:
-        raise HTTPException(404, "代理不存在")
+        raise HTTPException(404, "Proxy not found")
     return result
 
 

@@ -29,12 +29,12 @@ function SolverPanel() {
     checkSolver()
   }, [])
 
-  const solverLabel = solverRunning === null ? '检测中' : solverRunning ? '运行中' : '未运行'
+  const solverLabel = solverRunning === null ? 'Detecting' : solverRunning ? 'Running' : 'Not Running'
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-[var(--text-primary)]">Turnstile 求解器</h2>
-      <p className="mt-1 text-sm text-[var(--text-muted)]">本地 Turnstile 验证码求解服务状态。</p>
+      <h2 className="text-base font-semibold text-[var(--text-primary)]">Turnstile Solver</h2>
+      <p className="mt-1 text-sm text-[var(--text-muted)]">Local Turnstile CAPTCHA solving service status.</p>
       <div className="mt-4 flex items-center gap-4">
         <div className="flex items-center gap-2">
           {solverRunning === null ? (
@@ -55,7 +55,7 @@ function SolverPanel() {
         </div>
         <Button variant="outline" size="sm" onClick={restartSolver}>
           <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-          重启 Solver
+          Restart Solver
         </Button>
       </div>
     </section>
@@ -126,9 +126,9 @@ function PlatformCapsPanel() {
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-[var(--text-primary)]">平台能力</h2>
+      <h2 className="text-base font-semibold text-[var(--text-primary)]">Platform Capabilities</h2>
       <p className="mt-1 text-sm text-[var(--text-muted)]">
-        自定义各平台支持的执行方式、注册身份和第三方入口。
+        Customize execution methods, registration identity, and third-party entry points for each platform.
       </p>
       <div className="mt-4 space-y-4">
         {platforms.map((p) => {
@@ -154,12 +154,12 @@ function PlatformCapsPanel() {
                   </p>
                 </div>
                 <button onClick={() => reset(p.name)} className="table-action-btn">
-                  恢复默认
-                </button>
+                   Reset to Default
+                 </button>
               </div>
               <div className="space-y-3">
                 <div>
-                  <p className="mb-2 text-xs text-[var(--text-muted)]">执行方式</p>
+                   <p className="mb-2 text-xs text-[var(--text-muted)]">Execution Methods</p>
                   <div className="flex flex-wrap gap-4">
                     {executorOptions.map((option) => (
                       <label
@@ -178,7 +178,7 @@ function PlatformCapsPanel() {
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs text-[var(--text-muted)]">注册身份</p>
+                   <p className="mb-2 text-xs text-[var(--text-muted)]">Registration Identity</p>
                   <div className="flex gap-4">
                     {identityOptions.map((option) => (
                       <label
@@ -197,7 +197,7 @@ function PlatformCapsPanel() {
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs text-[var(--text-muted)]">第三方入口</p>
+                   <p className="mb-2 text-xs text-[var(--text-muted)]">Third-party Entry Points</p>
                   <div className="flex flex-wrap gap-4">
                     {oauthOptions.map((option) => (
                       <label
@@ -221,7 +221,7 @@ function PlatformCapsPanel() {
               <div className="mt-4">
                 <Button size="sm" onClick={() => save(p.name)} disabled={saving[p.name]}>
                   <Save className="mr-1 h-3.5 w-3.5" />
-                  {saved[p.name] ? '已保存 ✓' : saving[p.name] ? '保存中...' : '保存'}
+                  {saved[p.name] ? 'Saved ✓' : saving[p.name] ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             </div>

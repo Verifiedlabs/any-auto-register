@@ -102,12 +102,12 @@ export function getCaptchaStrategyLabel(executorType: string, policy?: CaptchaPo
   if (executorType === 'headless' || executorType === 'headed') {
     const browserDefault = policy?.browser_mode || ''
     const label = providers?.find(item => item.value === browserDefault)?.label || browserDefault
-    return label ? `浏览器模式默认使用 ${label}` : '浏览器模式未配置默认验证码 provider'
+    return label ? `Browser mode uses ${label} by default` : 'Browser mode has no default captcha provider configured'
   }
   const order = policy?.protocol_order || []
   if (order.length === 0) {
-    return '协议模式未配置可用的远程验证码 provider'
+    return 'Protocol mode has no available remote captcha provider configured'
   }
   const labels = order.map(value => providers?.find(item => item.value === value)?.label || value)
-  return `协议模式按已启用顺序自动选择远程打码服务：${labels.join(' -> ')}`
+  return `Protocol mode automatically selects remote captcha service in enabled order: ${labels.join(' -> ')}`
 }

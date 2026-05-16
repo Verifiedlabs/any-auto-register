@@ -4,14 +4,14 @@ from infrastructure.platform_runtime import PlatformRuntime
 
 
 EXECUTOR_LABELS = {
-    "protocol": "协议模式",
-    "headless": "后台浏览器自动",
-    "headed": "可视浏览器自动",
+    "protocol": "Protocol",
+    "headless": "Headless Browser",
+    "headed": "Visible Browser",
 }
 
 IDENTITY_MODE_LABELS = {
-    "mailbox": "系统邮箱",
-    "oauth_browser": "第三方账号",
+    "mailbox": "System Mailbox",
+    "oauth_browser": "Third-party Account",
 }
 
 OAUTH_PROVIDER_LABELS = {

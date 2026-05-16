@@ -218,7 +218,7 @@ def import_accounts(body: ImportRequest):
 def get_account(account_id: int):
     item = service.get_account(account_id)
     if not item:
-        raise HTTPException(404, "账号不存在")
+        raise HTTPException(404, "Account not found")
     return item
 
 
@@ -226,7 +226,7 @@ def get_account(account_id: int):
 def update_account(account_id: int, body: AccountUpdateRequest):
     item = service.update_account(account_id, AccountUpdateCommand(**body.model_dump()))
     if not item:
-        raise HTTPException(404, "账号不存在")
+        raise HTTPException(404, "Account not found")
     return item
 
 
@@ -234,5 +234,5 @@ def update_account(account_id: int, body: AccountUpdateRequest):
 def delete_account(account_id: int):
     result = service.delete_account(account_id)
     if not result["ok"]:
-        raise HTTPException(404, "账号不存在")
+        raise HTTPException(404, "Account not found")
     return result

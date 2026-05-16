@@ -18,6 +18,22 @@ _BUILTIN_DEFINITIONS: list[dict] = [
     # ── mailbox ──────────────────────────────────────────────────────
     {
         "provider_type": "mailbox",
+        "provider_key": "tempmail_malghz",
+        "label": "TempMail Malghz (Custom Domain)",
+        "description": "Self-hosted tempmail on malghz.my.id with custom domain email",
+        "driver_type": "tempmail_malghz",
+        "default_auth_mode": "",
+        "enabled": True,
+        "category": "selfhost",
+        "auth_modes": [],
+        "fields": [
+            {"key": "tempmail_malghz_api_url", "label": "API URL", "placeholder": "https://tempmail.malghz.my.id", "category": "connection"},
+            {"key": "tempmail_malghz_domain", "label": "Email Domain", "placeholder": "malghz.my.id", "category": "connection"},
+            {"key": "tempmail_malghz_admin_token", "label": "Admin Token (optional)", "secret": True, "category": "auth"},
+        ],
+    },
+    {
+        "provider_type": "mailbox",
         "provider_key": "cfworker_admin_api",
         "label": "CF Worker（自建域名）",
         "description": "基于 Cloudflare Worker 的自定义域名邮箱，需自行部署 Worker 后端",

@@ -66,7 +66,7 @@ def herosms_balance(body: HeroSmsQueryRequest | None = None):
     body = body or HeroSmsQueryRequest()
     provider = _provider_from_payload(body)
     if not provider.api_key:
-        raise HTTPException(400, "HeroSMS API Key 未配置")
+        raise HTTPException(400, "HeroSMS API Key not configured")
     try:
         return {"balance": provider.get_balance()}
     except Exception as exc:
@@ -78,7 +78,7 @@ def herosms_prices(body: HeroSmsQueryRequest | None = None):
     body = body or HeroSmsQueryRequest()
     provider = _provider_from_payload(body)
     if not provider.api_key:
-        raise HTTPException(400, "HeroSMS API Key 未配置")
+        raise HTTPException(400, "HeroSMS API Key not configured")
     try:
         service = str(body.service or provider.default_service or HERO_SMS_DEFAULT_SERVICE)
         country = str(body.country or provider.default_country or HERO_SMS_DEFAULT_COUNTRY)
@@ -104,7 +104,7 @@ def herosms_top_countries(body: HeroSmsBestCountryRequest | None = None):
         api_key=body.api_key, service=body.service, proxy=body.proxy,
     ))
     if not provider.api_key:
-        raise HTTPException(400, "HeroSMS API Key 未配置")
+        raise HTTPException(400, "HeroSMS API Key not configured")
     try:
         service = str(body.service or provider.default_service or HERO_SMS_DEFAULT_SERVICE)
         rows = provider.get_top_countries(service=service)
@@ -125,7 +125,7 @@ def herosms_best_country(body: HeroSmsBestCountryRequest | None = None):
         api_key=body.api_key, service=body.service, proxy=body.proxy,
     ))
     if not provider.api_key:
-        raise HTTPException(400, "HeroSMS API Key 未配置")
+        raise HTTPException(400, "HeroSMS API Key not configured")
     try:
         service = str(body.service or provider.default_service or HERO_SMS_DEFAULT_SERVICE)
         best = provider.get_best_country(
@@ -193,7 +193,7 @@ def smsbower_balance(body: HeroSmsQueryRequest | None = None):
     body = body or HeroSmsQueryRequest()
     provider = _smsbower_from_payload(body)
     if not provider.api_key:
-        raise HTTPException(400, "SMSBower API Key 未配置")
+        raise HTTPException(400, "SMSBower API Key not configured")
     try:
         return {"balance": provider.get_balance()}
     except Exception as exc:
@@ -205,7 +205,7 @@ def smsbower_prices(body: HeroSmsQueryRequest | None = None):
     body = body or HeroSmsQueryRequest()
     provider = _smsbower_from_payload(body)
     if not provider.api_key:
-        raise HTTPException(400, "SMSBower API Key 未配置")
+        raise HTTPException(400, "SMSBower API Key not configured")
     try:
         service = str(body.service or provider.default_service or HERO_SMS_DEFAULT_SERVICE)
         country = str(body.country or provider.default_country or HERO_SMS_DEFAULT_COUNTRY)

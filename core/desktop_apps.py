@@ -130,8 +130,8 @@ def build_desktop_app_state(
         "install_paths": install_candidates,
         "binaries": binary_candidates,
         "config_paths": config_candidates,
-        "status_label": "已打开" if running else "未打开",
-        "ready_label": "已就绪" if installed and configured else ("未配置" if installed else "未安装"),
+        "status_label": "Running" if running else "Not Running",
+        "ready_label": "Ready" if installed and configured else ("Not Configured" if installed else "Not Installed"),
     }
     if extra:
         state.update(extra)

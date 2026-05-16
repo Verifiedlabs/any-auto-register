@@ -27,7 +27,7 @@ class CapabilityDefinition:
 STANDARD_CAPABILITIES: Dict[str, CapabilityDefinition] = {
     "query_state": CapabilityDefinition(
         id="query_state",
-        label="查询账号状态/额度",
+        label="Query Account Status/Quota",
         description="Query account status and quota information",
         category="state",
         icon="refresh",
@@ -36,7 +36,7 @@ STANDARD_CAPABILITIES: Dict[str, CapabilityDefinition] = {
     
     "refresh_token": CapabilityDefinition(
         id="refresh_token",
-        label="刷新 Token",
+        label="Refresh Token",
         description="Refresh authentication token",
         category="auth", 
         icon="key",
@@ -45,35 +45,35 @@ STANDARD_CAPABILITIES: Dict[str, CapabilityDefinition] = {
     
     "generate_link": CapabilityDefinition(
         id="generate_link",
-        label="生成试用/支付链接",
+        label="Generate Trial/Payment Link",
         description="Generate payment or trial link",
         category="payment",
         icon="link",
         requires_params=True,
         param_schema=[
-            {"key": "plan", "label": "套餐", "type": "select", "options": ["plus", "team"]},
-            {"key": "country", "label": "国家", "type": "select", "options": ["US", "SG", "TR", "HK", "JP", "GB", "AU", "CA"]},
+            {"key": "plan", "label": "Plan", "type": "select", "options": ["plus", "team"]},
+            {"key": "country", "label": "Country", "type": "select", "options": ["US", "SG", "TR", "HK", "JP", "GB", "AU", "CA"]},
         ],
         ui_hints={"inline": True, "priority": 3}
     ),
     
     "generate_link_browser": CapabilityDefinition(
         id="generate_link_browser",
-        label="生成试用/支付链接（浏览器）",
+        label="Generate Trial/Payment Link (Browser)",
         description="Generate payment or trial link using browser automation",
         category="payment",
         icon="globe",
         requires_params=True,
         param_schema=[
-            {"key": "timeout", "label": "等待秒数（默认 180）", "type": "number"},
-            {"key": "headless", "label": "无头模式", "type": "select", "options": ["false", "true"]},
+            {"key": "timeout", "label": "Wait Seconds (default 180)", "type": "number"},
+            {"key": "headless", "label": "Headless Mode", "type": "select", "options": ["false", "true"]},
         ],
         ui_hints={"inline": False, "priority": 4}
     ),
     
     "switch_desktop": CapabilityDefinition(
         id="switch_desktop",
-        label="切换到桌面应用",
+        label="Switch to Desktop App",
         description="Switch to desktop application",
         category="auth",
         icon="monitor",
@@ -82,7 +82,7 @@ STANDARD_CAPABILITIES: Dict[str, CapabilityDefinition] = {
     
     "upload_cpa": CapabilityDefinition(
         id="upload_cpa",
-        label="上传至 CPA",
+        label="Upload to CPA",
         description="Upload account to CPA system",
         category="integration",
         icon="upload",
@@ -96,7 +96,7 @@ STANDARD_CAPABILITIES: Dict[str, CapabilityDefinition] = {
     
     "upload_tm": CapabilityDefinition(
         id="upload_tm",
-        label="上传至 Team Manager",
+        label="Upload to Team Manager",
         description="Upload account to Team Manager",
         category="integration",
         icon="users",
@@ -110,7 +110,7 @@ STANDARD_CAPABILITIES: Dict[str, CapabilityDefinition] = {
     
     "check_trial": CapabilityDefinition(
         id="check_trial",
-        label="检查试用资格",
+        label="Check Trial Eligibility",
         description="Check trial eligibility",
         category="payment",
         icon="check-circle",
@@ -119,13 +119,13 @@ STANDARD_CAPABILITIES: Dict[str, CapabilityDefinition] = {
     
     "create_api_key": CapabilityDefinition(
         id="create_api_key",
-        label="创建 API Key",
+        label="Create API Key",
         description="Create API key",
         category="auth",
         icon="key",
         requires_params=True,
         param_schema=[
-            {"key": "name", "label": "Key 名称", "type": "text"},
+            {"key": "name", "label": "Key Name", "type": "text"},
         ],
         ui_hints={"inline": False, "priority": 9}
     ),

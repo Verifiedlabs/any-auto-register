@@ -42,15 +42,19 @@ class WindsurfProtocolMailboxWorker:
             name=name,
         )
         auth_token = str(complete.get("token") or "")
-        auth = self.client.post_auth(auth_token)
+        auth1_token = auth_token if auth_token.startswith("auth1_") else ""
+        plain_token = auth_token if not auth_token.startswith("auth1_") else ""
+        auth = self.client.post_auth(plain_token, auth1_token=auth1_token)
         session_token = auth["session_token"]
         account_id = auth.get("account_id", "")
         org_id = auth.get("org_id", "")
+        post_auth_auth1 = auth.get("auth_token", "") or auth1_token
         state = self.client.load_account_state(
             session_token=session_token,
             account_id=account_id,
             org_id=org_id,
             fallback_email=email,
+            auth1_token=post_auth_auth1,
         )
         summary = dict(state.get("summary") or {})
         overview = dict(summary.get("account_overview") or {})

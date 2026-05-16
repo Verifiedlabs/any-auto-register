@@ -26,4 +26,4 @@ def auth_login(body: LoginRequest):
         return {"ok": True}
     if body.password == password:
         return {"ok": True, "token": password}
-    return {"ok": False, "error": "密码错误"}
+    return {"ok": False, "error": "Incorrect password"}

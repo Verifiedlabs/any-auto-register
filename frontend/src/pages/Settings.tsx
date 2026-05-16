@@ -30,55 +30,55 @@ const PROVIDER_META: Record<ProviderType, {
   emptyText: string
   metricLabel: string
 }> = {
-  mailbox: {
-    tabLabel: '邮箱服务',
-    icon: Mail,
-    detailTitle: '邮箱 Provider 详情',
-    addTitle: '新增邮箱 Provider',
-    createTitle: '新建动态邮箱 Provider',
-    addDialogHint: '从邮箱 provider catalog 中选择',
-    usageHint: '只有在注册身份选择“系统邮箱”时，才会使用这里的邮箱服务配置。列表行内可以直接查看详情、编辑、设默认和删除。',
-    usageHintClassName: 'rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-[var(--text-secondary)]',
-    listTitle: '邮箱 Provider 列表',
-    listDescription: (count: number) => `${count} 个配置，支持查看详情、编辑、设默认、删除。`,
-    noAvailableText: '当前没有可新增的邮箱 provider',
-    availableText: (count: number) => `还有 ${count} 个邮箱 provider 可新增`,
-    emptyText: '当前没有邮箱 provider 配置，请先新增一个 provider。',
-    metricLabel: '邮箱服务',
-  },
-  captcha: {
-    tabLabel: '验证服务',
-    icon: Shield,
-    detailTitle: '验证 Provider 详情',
-    addTitle: '新增验证 Provider',
-    createTitle: '新建动态验证 Provider',
-    addDialogHint: '从验证 provider catalog 中选择',
-    usageHint: '协议模式会按已启用顺序自动选择远程打码服务；浏览器模式使用当前默认的验证码 provider。列表行内可以直接查看详情、编辑、设默认、删除。',
-    usageHintClassName: 'rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-[var(--text-secondary)]',
-    listTitle: '验证 Provider 列表',
-    listDescription: (count: number) => `${count} 个配置，协议模式会依次读取这里的可用项。`,
-    noAvailableText: '当前没有可新增的验证 provider',
-    availableText: (count: number) => `还有 ${count} 个验证 provider 可新增`,
-    emptyText: '当前没有验证 provider 配置，请先新增一个 provider。',
-    metricLabel: '验证码服务',
-  },
-  sms: {
-    tabLabel: '接码服务',
-    icon: MessageSquare,
-    detailTitle: '接码 Provider 详情',
-    addTitle: '新增接码 Provider',
-    createTitle: '新建动态接码 Provider',
-    addDialogHint: '从接码 provider catalog 中选择',
-    usageHint: '当平台需要手机号验证时，会按这里启用的接码 provider 创建临时号码并回填短信验证码。列表行内可以直接查看详情、编辑、设默认和删除。',
-    usageHintClassName: 'rounded-lg border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm text-[var(--text-secondary)]',
-    listTitle: '接码 Provider 列表',
-    listDescription: (count: number) => `${count} 个配置，补手机和短信校验会优先使用这里的默认项。`,
-    noAvailableText: '当前没有可新增的接码 provider',
-    availableText: (count: number) => `还有 ${count} 个接码 provider 可新增`,
-    emptyText: '当前没有接码 provider 配置，请先新增一个 provider。',
-    metricLabel: '接码服务',
-  },
-}
+   mailbox: {
+     tabLabel: 'Email Service',
+     icon: Mail,
+     detailTitle: 'Email Provider Details',
+     addTitle: 'Add Email Provider',
+     createTitle: 'Create Dynamic Email Provider',
+     addDialogHint: 'Select from email provider catalog',
+     usageHint: 'Email service configuration here is only used when "System Email" is selected as the registration identity. You can view details, edit, set default, and delete directly in the list.',
+     usageHintClassName: 'rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-[var(--text-secondary)]',
+     listTitle: 'Email Provider List',
+     listDescription: (count: number) => `${count} configurations, support viewing details, editing, setting default, and deleting.`,
+     noAvailableText: 'No email providers available to add',
+     availableText: (count: number) => `${count} email providers available to add`,
+     emptyText: 'No email provider configuration. Please add one first.',
+     metricLabel: 'Email Service',
+   },
+   captcha: {
+     tabLabel: 'Verification Service',
+     icon: Shield,
+     detailTitle: 'Verification Provider Details',
+     addTitle: 'Add Verification Provider',
+     createTitle: 'Create Dynamic Verification Provider',
+     addDialogHint: 'Select from verification provider catalog',
+     usageHint: 'Protocol mode automatically selects remote captcha service in enabled order; browser mode uses the current default verification provider. You can view details, edit, set default, and delete directly in the list.',
+     usageHintClassName: 'rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-[var(--text-secondary)]',
+     listTitle: 'Verification Provider List',
+     listDescription: (count: number) => `${count} configurations, protocol mode will read available items here in order.`,
+     noAvailableText: 'No verification providers available to add',
+     availableText: (count: number) => `${count} verification providers available to add`,
+     emptyText: 'No verification provider configuration. Please add one first.',
+     metricLabel: 'Verification Service',
+   },
+   sms: {
+     tabLabel: 'SMS Service',
+     icon: MessageSquare,
+     detailTitle: 'SMS Provider Details',
+     addTitle: 'Add SMS Provider',
+     createTitle: 'Create Dynamic SMS Provider',
+     addDialogHint: 'Select from SMS provider catalog',
+     usageHint: 'When the platform requires phone verification, temporary numbers will be created using enabled SMS providers here and SMS verification codes will be filled back. You can view details, edit, set default, and delete directly in the list.',
+     usageHintClassName: 'rounded-lg border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm text-[var(--text-secondary)]',
+     listTitle: 'SMS Provider List',
+     listDescription: (count: number) => `${count} configurations, phone and SMS verification will prioritize using the default item here.`,
+     noAvailableText: 'No SMS providers available to add',
+     availableText: (count: number) => `${count} SMS providers available to add`,
+     emptyText: 'No SMS provider configuration. Please add one first.',
+     metricLabel: 'SMS Service',
+   },
+ }
 
 function SettingsMetric({
   label,
@@ -178,12 +178,12 @@ function PlatformCapsTab() {
               </div>
               <button onClick={() => reset(p.name)}
                 className="table-action-btn">
-                恢复默认
+                 Restore Default
               </button>
             </div>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-[var(--text-muted)] mb-2">执行方式</p>
+                 <p className="text-xs text-[var(--text-muted)] mb-2">Executor Type</p>
                 <div className="flex flex-wrap gap-4">
                   {executorOptions.map(option => (
                     <label key={option.value} className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
@@ -196,7 +196,7 @@ function PlatformCapsTab() {
                 </div>
               </div>
               <div>
-                <p className="text-xs text-[var(--text-muted)] mb-2">注册身份</p>
+                 <p className="text-xs text-[var(--text-muted)] mb-2">Registration Identity</p>
                 <div className="flex gap-4">
                   {identityOptions.map(option => (
                     <label key={option.value} className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
@@ -209,7 +209,7 @@ function PlatformCapsTab() {
                 </div>
               </div>
               <div>
-                <p className="text-xs text-[var(--text-muted)] mb-2">第三方入口</p>
+                 <p className="text-xs text-[var(--text-muted)] mb-2">Third-party Entry</p>
                 <div className="flex flex-wrap gap-4">
                   {oauthOptions.map(option => (
                     <label key={option.value} className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
@@ -225,7 +225,7 @@ function PlatformCapsTab() {
             <div className="mt-4">
               <Button size="sm" onClick={() => save(p.name)} disabled={saving[p.name]}>
                 <Save className="h-3.5 w-3.5 mr-1" />
-                {saved[p.name] ? '已保存 ✓' : saving[p.name] ? '保存中...' : '保存'}
+                 {saved[p.name] ? 'Saved ✓' : saving[p.name] ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>
@@ -237,22 +237,22 @@ function PlatformCapsTab() {
 
 const TABS: { id: string; label: string; icon: any; sections?: any[] }[] = [
   {
-    id: 'register', label: '注册策略', icon: Cpu,
+    id: 'register', label: 'Registration Strategy', icon: Cpu,
     sections: [{
-      section: '默认注册策略',
-      desc: '这里配置的是默认行为，账号列表和注册页会直接复用这些设置。',
+      section: 'Default Registration Strategy',
+      desc: 'Default behavior configured here will be reused directly in account list and registration page.',
       items: [
-        { key: 'default_identity_provider', label: '默认注册身份' },
-        { key: 'default_oauth_provider', label: '默认第三方入口', placeholder: '' },
-        { key: 'default_executor', label: '默认执行方式' },
+        { key: 'default_identity_provider', label: 'Default Registration Identity' },
+        { key: 'default_oauth_provider', label: 'Default Third-party Entry', placeholder: '' },
+        { key: 'default_executor', label: 'Default Execution Method' },
       ],
     }, {
-      section: '浏览器复用',
-      desc: '第三方账号走后台浏览器自动时，通常需要复用本机已登录浏览器。',
+      section: 'Browser Reuse',
+      desc: 'When using background browser for third-party accounts, you typically need to reuse the locally logged-in browser.',
       items: [
-        { key: 'oauth_email_hint', label: '预期登录邮箱', placeholder: 'your-account@example.com' },
-        { key: 'chrome_user_data_dir', label: 'Chrome Profile 路径', placeholder: '~/Library/Application Support/Google/Chrome' },
-        { key: 'chrome_cdp_url', label: 'Chrome CDP 地址', placeholder: 'http://localhost:9222' },
+        { key: 'oauth_email_hint', label: 'Expected login email', placeholder: 'your-account@example.com' },
+        { key: 'chrome_user_data_dir', label: 'Chrome Profile path', placeholder: '~/Library/Application Support/Google/Chrome' },
+        { key: 'chrome_cdp_url', label: 'Chrome CDP address', placeholder: 'http://localhost:9222' },
       ],
     }],
   },
@@ -269,28 +269,28 @@ const TABS: { id: string; label: string; icon: any; sections?: any[] }[] = [
     sections: [],
   },
   {
-    id: 'platform_caps', label: '高级：平台能力', icon: Sliders,
+    id: 'platform_caps', label: 'Advanced: Platform Capabilities', icon: Sliders,
     sections: [],
   },
   {
     id: 'chatgpt', label: 'ChatGPT', icon: Shield,
     sections: [{
-      section: 'CPA 面板',
-      desc: '注册完成后自动上传到 CPA 管理平台',
+      section: 'CPA Panel',
+      desc: 'Auto upload to CPA management platform after registration',
       items: [
         { key: 'cpa_api_url', label: 'API URL', placeholder: 'https://your-cpa.example.com' },
         { key: 'cpa_api_key', label: 'API Key', secret: true },
       ],
     }, {
       section: 'Team Manager',
-      desc: '上传到自建 Team Manager 系统',
+      desc: 'Upload to self-hosted Team Manager system',
       items: [
         { key: 'team_manager_url', label: 'API URL', placeholder: 'https://your-tm.example.com' },
         { key: 'team_manager_key', label: 'API Key', secret: true },
       ],
     }, {
       section: 'Any2Api',
-      desc: '同步账号到 Any2Api 服务，用于导出和对接',
+      desc: 'Sync accounts to Any2Api service for export and integration',
       items: [
         { key: 'any2api_url', label: 'API URL', placeholder: 'https://your-any2api.example.com' },
         { key: 'any2api_password', label: 'Password', secret: true },
@@ -411,9 +411,9 @@ function HeroSmsTools({ item }: { item: ProviderSetting }) {
         method: 'POST',
         body: JSON.stringify(payload()),
       })
-      setMessage(`余额: $${Number(data.balance ?? 0).toFixed(3)}`)
+      setMessage(`Balance: $${Number(data.balance ?? 0).toFixed(3)}`)
     } catch (e: any) {
-      setMessage(e.message || '余额查询失败')
+      setMessage(e.message || 'Balance query failed')
     } finally {
       setLoading('')
     }
@@ -432,12 +432,12 @@ function HeroSmsTools({ item }: { item: ProviderSetting }) {
       const service = payload().service
       const current = prices?.[country]?.[service]
       if (current) {
-        setMessage(`当前价格: $${current.cost}，可用数量: ${current.count}`)
+        setMessage(`Current price: $${current.cost}, Available count: ${current.count}`)
       } else {
-        setMessage('未找到当前服务/国家的价格信息')
+        setMessage('Price info not found for current service/country')
       }
     } catch (e: any) {
-      setMessage(e.message || '价格查询失败')
+      setMessage(e.message || 'Price query failed')
     } finally {
       setLoading('')
     }
@@ -447,15 +447,15 @@ function HeroSmsTools({ item }: { item: ProviderSetting }) {
     <div className="rounded-xl border border-sky-500/20 bg-sky-500/10 px-3 py-3 text-xs text-[var(--text-secondary)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="font-medium text-[var(--text-primary)]">HeroSMS 工具</div>
-          <div className="mt-1 text-[var(--text-muted)]">使用当前 API Key、服务代码和国家 ID 查询余额/价格。</div>
+          <div className="font-medium text-[var(--text-primary)]">HeroSMS Tool</div>
+          <div className="mt-1 text-[var(--text-muted)]">Query balance/price using current API Key, service code and country ID.</div>
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={queryBalance} disabled={Boolean(loading)}>
-            {loading === 'balance' ? '查询中...' : '查余额'}
+             {loading === 'balance' ? 'Querying...' : 'Check Balance'}
           </Button>
           <Button size="sm" variant="outline" onClick={queryPrice} disabled={Boolean(loading)}>
-            {loading === 'price' ? '查询中...' : '查价格'}
+             {loading === 'price' ? 'Querying...' : 'Check Price'}
           </Button>
         </div>
       </div>
@@ -492,10 +492,10 @@ function ProviderDetailModal({
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[var(--border)] bg-[var(--bg-hover)] px-2 py-0.5 text-[11px] text-[var(--text-secondary)]">
-              {item.auth_modes.find((mode: any) => mode.value === item.auth_mode)?.label || item.auth_mode || '未设置认证方式'}
+               {item.auth_modes.find((mode: any) => mode.value === item.auth_mode)?.label || item.auth_mode || 'No auth mode set'}
             </span>
             {item.is_default ? (
-              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] text-emerald-300">默认 Provider</span>
+               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] text-emerald-300">Default Provider</span>
             ) : null}
           </div>
           {item.description ? (
@@ -507,7 +507,7 @@ function ProviderDetailModal({
             <HeroSmsTools item={item} />
           ) : null}
           <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
-            <label className="text-sm text-[var(--text-secondary)] font-medium">配置名称</label>
+              <label className="text-sm text-[var(--text-secondary)] font-medium">Config Name</label>
             <div className="col-span-2">
               <input
                 type="text"
@@ -520,22 +520,22 @@ function ProviderDetailModal({
             </div>
           </div>
           {item.auth_modes?.length > 0 && (
-            <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
-              <label className="text-sm text-[var(--text-secondary)] font-medium">认证方式</label>
-              <div className="col-span-2">
-                <select
-                  value={item.auth_mode}
-                  onChange={e => onChangeAuthMode(e.target.value)}
-                  disabled={readOnly}
-                  className="control-surface appearance-none disabled:opacity-70"
-                >
+             <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
+               <label className="text-sm text-[var(--text-secondary)] font-medium">Auth Mode</label>
+               <div className="col-span-2">
+                 <select
+                   value={item.auth_mode}
+                   onChange={e => onChangeAuthMode(e.target.value)}
+                   disabled={readOnly}
+                   className="control-surface appearance-none disabled:opacity-70"
+                 >
                   {item.auth_modes.map((mode: any) => <option key={mode.value} value={mode.value}>{mode.label}</option>)}
                 </select>
               </div>
             </div>
           )}
           {item.fields.length === 0 ? (
-            <div className="text-sm text-[var(--text-muted)] py-3">这个 provider 当前无需额外配置。</div>
+             <div className="text-sm text-[var(--text-muted)] py-3">This provider requires no additional configuration.</div>
           ) : (
             <GroupedProviderFields
               fields={item.fields}
@@ -551,16 +551,16 @@ function ProviderDetailModal({
         <div className="flex-shrink-0 flex gap-3 px-6 py-4 border-t border-[var(--border)]">
           {readOnly ? (
             <>
-              <Button onClick={onEdit} className="flex-1">切换到编辑</Button>
-              <Button variant="outline" onClick={onClose} className="flex-1">关闭</Button>
+             <Button onClick={onEdit} className="flex-1">Switch to Edit</Button>
+             <Button variant="outline" onClick={onClose} className="flex-1">Close</Button>
             </>
-          ) : (
-            <>
-              <Button onClick={onSave} disabled={saving} className="flex-1">
-                <Save className="h-4 w-4 mr-2" />
-                {saved ? '已保存 ✓' : saving ? '保存中...' : '保存'}
-              </Button>
-              <Button variant="outline" onClick={onClose} className="flex-1">取消</Button>
+           ) : (
+             <>
+               <Button onClick={onSave} disabled={saving} className="flex-1">
+                 <Save className="h-4 w-4 mr-2" />
+                  {saved ? 'Saved ✓' : saving ? 'Saving...' : 'Save'}
+               </Button>
+               <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
             </>
           )}
         </div>
@@ -592,11 +592,11 @@ function AddProviderModal({
         <div className="px-6 py-4">
           {providers.length === 0 ? (
             <div className="empty-state-panel">
-              当前可新增的 provider 已全部加入列表。
+               All available providers have been added to the list.
             </div>
           ) : (
             <div className="space-y-3">
-              <label className="block text-sm text-[var(--text-secondary)]">选择 Provider</label>
+               <label className="block text-sm text-[var(--text-secondary)]">Select Provider</label>
               <select
                 value={selectedKey}
                 onChange={e => onSelect(e.target.value)}
@@ -621,19 +621,19 @@ function AddProviderModal({
             className="flex-1"
           >
             <Plus className="h-4 w-4 mr-2" />
-            {creating ? '新增中...' : '新增'}
+             {creating ? 'Adding...' : 'Add'}
           </Button>
-          <Button variant="outline" onClick={onClose} className="flex-1">取消</Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const FIELD_CATEGORY_LABELS: Record<string, string> = {
-  connection: '连接与端点',
-  auth: '认证',
-  identity: '邮箱身份',
+           <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+         </div>
+       </div>
+     </div>
+   )
+ }
+ 
+ const FIELD_CATEGORY_LABELS: Record<string, string> = {
+  connection: 'Connection & Endpoint',
+  auth: 'Authentication',
+  identity: 'Email Identity',
 }
 
 function GroupedProviderFields({
@@ -714,13 +714,13 @@ function CreateProviderDefinitionModal({
         <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
           <div>
             <h2 className="text-base font-semibold text-[var(--text-primary)]">{title}</h2>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">新增一个动态 provider definition，并同时创建首个可用配置。</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Add a dynamic provider definition and create the first available configuration.</p>
           </div>
           <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"><X className="h-4 w-4" /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
-            <label className="text-sm text-[var(--text-secondary)] font-medium">Provider 名称</label>
+             <label className="text-sm text-[var(--text-secondary)] font-medium">Provider Name</label>
             <div className="col-span-2">
               <input value={form.label} onChange={e => onChange('label', e.target.value)} placeholder="My Provider" className="control-surface" />
             </div>
@@ -732,13 +732,13 @@ function CreateProviderDefinitionModal({
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
-            <label className="text-sm text-[var(--text-secondary)] font-medium">描述</label>
-            <div className="col-span-2">
-              <input value={form.description} onChange={e => onChange('description', e.target.value)} placeholder="可选" className="control-surface" />
+             <label className="text-sm text-[var(--text-secondary)] font-medium">Description</label>
+             <div className="col-span-2">
+               <input value={form.description} onChange={e => onChange('description', e.target.value)} placeholder="Optional" className="control-surface" />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
-            <label className="text-sm text-[var(--text-secondary)] font-medium">驱动族</label>
+             <label className="text-sm text-[var(--text-secondary)] font-medium">Driver Family</label>
             <div className="col-span-2">
               <select value={form.driver_type} onChange={e => onChange('driver_type', e.target.value)} className="control-surface appearance-none">
                 {drivers.map((driver: ProviderDriver) => (
@@ -750,9 +750,9 @@ function CreateProviderDefinitionModal({
           </div>
           {currentAuthModes.length > 0 && (
             <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
-              <label className="text-sm text-[var(--text-secondary)] font-medium">认证方式</label>
-              <div className="col-span-2">
-                <select value={form.auth_mode} onChange={e => onChange('auth_mode', e.target.value)} className="control-surface appearance-none">
+               <label className="text-sm text-[var(--text-secondary)] font-medium">Auth Mode</label>
+               <div className="col-span-2">
+                 <select value={form.auth_mode} onChange={e => onChange('auth_mode', e.target.value)} className="control-surface appearance-none">
                   {currentAuthModes.map((mode: any) => (
                     <option key={mode.value} value={mode.value}>{mode.label}</option>
                   ))}
@@ -761,7 +761,7 @@ function CreateProviderDefinitionModal({
             </div>
           )}
           {currentFields.length === 0 ? (
-            <div className="text-sm text-[var(--text-muted)] py-3">这个驱动族当前无需额外配置字段。</div>
+             <div className="text-sm text-[var(--text-muted)] py-3">This driver family requires no additional configuration fields.</div>
           ) : (
             <GroupedProviderFields
               fields={currentFields}
@@ -782,14 +782,14 @@ function CreateProviderDefinitionModal({
         <div className="flex-shrink-0 flex gap-3 px-6 py-4 border-t border-[var(--border)]">
           <Button onClick={onCreate} disabled={creating} className="flex-1">
             <Plus className="h-4 w-4 mr-2" />
-            {creating ? '创建中...' : '创建并启用'}
+             {creating ? 'Creating...' : 'Create & Enable'}
           </Button>
-          <Button variant="outline" onClick={onClose} className="flex-1">取消</Button>
-        </div>
-      </div>
-    </div>
-  )
-}
+           <Button variant="outline" onClick={onClose} className="flex-1">Cancel</Button>
+         </div>
+       </div>
+     </div>
+   )
+ }
 
 export default function Settings({ embedded, defaultTab }: { embedded?: boolean; defaultTab?: string }) {
   const [activeTab, setActiveTab] = useState(defaultTab || 'register')
@@ -866,7 +866,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
         oauth_provider_options: [],
       })
       setProviderSettings({ mailbox: [], captcha: [], sms: [] })
-      setOptionsError('未加载到 provider 元数据。请重启后端后刷新页面。')
+      setOptionsError('Provider metadata not loaded. Please restart backend and refresh page.')
     }
   }
 
@@ -897,7 +897,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
     if (key === 'default_identity_provider') return configOptions.identity_mode_options || []
     if (key === 'default_oauth_provider') {
       return [
-        { label: '不预选，由当前页面选择', value: '' },
+        { label: 'No pre-selection, choose on current page', value: '' },
         ...((configOptions.oauth_provider_options || []).filter(option => option.value !== '')),
       ]
     }
@@ -1035,11 +1035,11 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
       invalidateConfigOptionsCache()
       invalidateConfigCache()
       await loadConfigData()
-      setProviderNotice(current => ({ ...current, [providerType]: `已保存 ${item.catalog_label || item.provider_key} 配置` }))
+      setProviderNotice(current => ({ ...current, [providerType]: `Saved ${item.catalog_label || item.provider_key} config` }))
       setProviderSaved(current => ({ ...current, [stateKey]: true }))
       setTimeout(() => setProviderSaved(current => ({ ...current, [stateKey]: false })), 2000)
     } catch (error) {
-      setProviderError(current => ({ ...current, [providerType]: getErrorMessage(error, '保存 provider 配置失败') }))
+      setProviderError(current => ({ ...current, [providerType]: getErrorMessage(error, 'Failed to save provider config') }))
     } finally {
       setProviderSaving(current => ({ ...current, [stateKey]: false }))
     }
@@ -1074,10 +1074,10 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
       })
       invalidateConfigOptionsCache()
       await loadConfigData()
-      setProviderNotice(current => ({ ...current, [providerType]: `已新增 ${catalog.label}` }))
+      setProviderNotice(current => ({ ...current, [providerType]: `Added ${catalog.label}` }))
       setProviderAddDialog(null)
     } catch (error) {
-      setProviderError(current => ({ ...current, [providerType]: getErrorMessage(error, '新增 provider 失败') }))
+      setProviderError(current => ({ ...current, [providerType]: getErrorMessage(error, 'Failed to add provider') }))
     } finally {
       setProviderCreating(current => ({ ...current, [stateKey]: false }))
     }
@@ -1089,7 +1089,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
     const driver = driverList.find(item => item.driver_type === payload.driver_type) || null
     const definitionKey = `${providerType}:${payload.provider_key || 'new'}`
     if (!payload.provider_key || !payload.label || !payload.driver_type) {
-      setProviderError(current => ({ ...current, [providerType]: '请先填写 Provider 名称、Key 和驱动族' }))
+      setProviderError(current => ({ ...current, [providerType]: 'Please fill in Provider Name, Key and Driver Family first' }))
       return
     }
     setProviderDefinitionCreating(current => ({ ...current, [definitionKey]: true }))
@@ -1124,7 +1124,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
       })
       invalidateConfigOptionsCache()
       await loadConfigData()
-      setProviderNotice(current => ({ ...current, [providerType]: `已创建动态 provider ${payload.label}` }))
+      setProviderNotice(current => ({ ...current, [providerType]: `Created dynamic provider ${payload.label}` }))
       setProviderCreateDialog(null)
       setProviderDefinitionForm(current => ({
         ...current,
@@ -1139,7 +1139,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
         },
       }))
     } catch (error) {
-      setProviderError(current => ({ ...current, [providerType]: getErrorMessage(error, '创建动态 provider 失败') }))
+      setProviderError(current => ({ ...current, [providerType]: getErrorMessage(error, 'Failed to create dynamic provider') }))
     } finally {
       setProviderDefinitionCreating(current => ({ ...current, [definitionKey]: false }))
     }
@@ -1152,7 +1152,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
   const mailboxCount = providerSettings.mailbox.length
   const captchaCount = providerSettings.captcha.length
   const smsCount = providerSettings.sms.length
-  const solverLabel = solverRunning === null ? '—' : solverRunning ? '运行中' : '未运行'
+  const solverLabel = solverRunning === null ? '—' : solverRunning ? 'Running' : 'Not Running'
   const currentTabMeta = TABS.find(item => item.id === activeTab) ?? TABS[0]
   const currentProviderTab = PROVIDER_TYPES.includes(activeTab as ProviderType) ? activeTab as ProviderType : null
 
@@ -1184,7 +1184,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
         {providerType === 'captcha' && (
           <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5">
             <div className="mb-2">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)]">当前策略</h3>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]">Current Strategy</h3>
             </div>
             <div className="text-sm text-[var(--text-secondary)]">{getCaptchaStrategyLabel('protocol', configOptions.captcha_policy, configOptions.captcha_providers)}</div>
             <div className="text-sm text-[var(--text-secondary)] mt-2">{getCaptchaStrategyLabel('headless', configOptions.captcha_policy, configOptions.captcha_providers)}</div>
@@ -1229,7 +1229,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
         <Card className="overflow-hidden p-2.5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="text-sm font-semibold text-[var(--text-primary)]">配置</div>
+              <div className="text-sm font-semibold text-[var(--text-primary)]">Configuration</div>
               <Badge variant="default">{currentTabMeta.label}</Badge>
               <Badge variant={solverRunning ? 'success' : solverRunning === false ? 'danger' : 'secondary'}>{solverLabel}</Badge>
             </div>
@@ -1242,8 +1242,8 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
           <SettingsMetric label={PROVIDER_META.mailbox.metricLabel} value={mailboxCount} icon={PROVIDER_META.mailbox.icon} />
           <SettingsMetric label={PROVIDER_META.captcha.metricLabel} value={captchaCount} icon={PROVIDER_META.captcha.icon} />
           <SettingsMetric label={PROVIDER_META.sms.metricLabel} value={smsCount} icon={PROVIDER_META.sms.icon} />
-          <SettingsMetric label="求解器" value={solverLabel} icon={Orbit} />
-          <SettingsMetric label="模块" value={TABS.length} icon={Package2} />
+          <SettingsMetric label="Solver" value={solverLabel} icon={Orbit} />
+          <SettingsMetric label="Modules" value={TABS.length} icon={Package2} />
         </div>
       )}
 
@@ -1275,7 +1275,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
             <>
               {activeTab === 'register' && (
                 <div className="rounded-lg border border-[var(--accent-edge)] bg-[var(--accent-soft)] px-4 py-3 text-sm text-[var(--text-secondary)]">
-                  普通使用者只需要理解两件事：注册身份选“系统邮箱”还是“第三方账号”，执行方式选“协议模式 / 后台浏览器自动 / 可视浏览器自动”。这里的配置只是设置默认值。
+                  Regular users only need to understand two things: choose "System Email" or "Third-party Account" for registration identity, and choose "Protocol Mode / Background Browser Auto / Visual Browser Auto" for execution method. The configuration here only sets default values.
                 </div>
               )}
               {currentProviderTab && renderProviderPanel(currentProviderTab)}
@@ -1295,7 +1295,7 @@ export default function Settings({ embedded, defaultTab }: { embedded?: boolean;
               {!currentProviderTab && (
                 <Button onClick={save} disabled={saving} className="w-full">
                   <Save className="h-4 w-4 mr-2" />
-                  {saved ? '已保存 ✓' : saving ? '保存中...' : '保存配置'}
+                  {saved ? 'Saved ✓' : saving ? 'Saving...' : 'Save Config'}
                 </Button>
               )}
             </>
