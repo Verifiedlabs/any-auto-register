@@ -28,11 +28,10 @@ def proxy_fetch(req: ProxyFetchRequest):
         with Session(engine) as s:
             for p in proxies:
                 url = format_proxy_url(p)
-                existing = s.exec(text(f"SELECT id FROM proxies WHERE url = :url"), {"url": url}).first()
+                existing = s.exec(text("SELECT id FROM proxies WHERE url = :url").bindparams(url=url)).first()
                 if not existing:
                     s.exec(
-                        text("INSERT INTO proxies (url, region, is_active, success_count, fail_count) VALUES (:url, :region, 1, 0, 0)"),
-                        {"url": url, "region": p.get("country", "")},
+                        text("INSERT INTO proxies (url, region, is_active, success_count, fail_count) VALUES (:url, :region, 1, 0, 0)").bindparams(url=url, region=p.get("country", "")),
                     )
                     count += 1
             s.commit()
@@ -51,11 +50,10 @@ def proxy_fetch_all(req: ProxyFetchRequest):
         with Session(engine) as s:
             for p in proxies:
                 url = format_proxy_url(p)
-                existing = s.exec(text("SELECT id FROM proxies WHERE url = :url"), {"url": url}).first()
+                existing = s.exec(text("SELECT id FROM proxies WHERE url = :url").bindparams(url=url)).first()
                 if not existing:
                     s.exec(
-                        text("INSERT INTO proxies (url, region, is_active, success_count, fail_count) VALUES (:url, :region, 1, 0, 0)"),
-                        {"url": url, "region": p.get("country", "")},
+                        text("INSERT INTO proxies (url, region, is_active, success_count, fail_count) VALUES (:url, :region, 1, 0, 0)").bindparams(url=url, region=p.get("country", "")),
                     )
                     count += 1
             s.commit()
