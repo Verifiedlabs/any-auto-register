@@ -36,8 +36,7 @@ export default function Checker() {
   }
 
   const liveCount = results.filter(r => r.live).length
-  const deadCount = results.filter(r => r.status === 'Die' || (!r.live && r.status !== 'error' && r.status !== 'invalid')).length
-  const errorCount = results.filter(r => r.status === 'error' || r.status === 'invalid').length
+  const deadCount = results.filter(r => !r.live && r.status !== 'error' && r.status !== 'invalid').length
 
   return (
     <div className="space-y-4">
