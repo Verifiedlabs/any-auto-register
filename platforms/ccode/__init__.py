@@ -64,12 +64,19 @@ def bulk_register_ccode(
     gmail_base: str,
     count: int = 10,
     aff_code: str = DEFAULT_AFF_CODE,
-    delay: float = 1.0,
+    delay: float = 5.0,
 ) -> list[dict]:
     results = []
     for _ in range(count):
         result = register_ccode(gmail_base, aff_code=aff_code)
         results.append(result)
+        if not result["ok"] and "频繁" in result.get("error", ""):
+            import re
+            wait_match = re.search(r"(\d+)\s*秒", result["error"])
+            wait_time = int(wait_match.group(1)) + 2 if wait_match else 60
+            time.sleep(wait_time)
+            retry = register_ccode(gmail_base, aff_code=aff_code)
+            results[-1] = retry
         if delay > 0:
             time.sleep(delay)
     return results
