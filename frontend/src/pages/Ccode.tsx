@@ -9,6 +9,7 @@ export default function Ccode() {
   const [gmailBase, setGmailBase] = useState('')
   const [count, setCount] = useState('5')
   const [affCode, setAffCode] = useState('3GLRG6XG8VQE')
+  const [useProxy, setUseProxy] = useState(true)
   const [running, setRunning] = useState(false)
   const [results, setResults] = useState<any[]>([])
 
@@ -18,7 +19,7 @@ export default function Ccode() {
     try {
       const res = await apiFetch('/ccode/register', {
         method: 'POST',
-        body: JSON.stringify({ gmail_base: gmailBase.trim(), count: parseInt(count) || 5, aff_code: affCode }),
+        body: JSON.stringify({ gmail_base: gmailBase.trim(), count: parseInt(count) || 5, aff_code: affCode, use_proxy: useProxy }),
       })
       setResults(res.results || [])
     } catch (e: any) {
@@ -75,6 +76,10 @@ export default function Ccode() {
                 <input className="input" placeholder="Count" value={count} onChange={e => setCount(e.target.value)} />
                 <input className="input" placeholder="Aff code" value={affCode} onChange={e => setAffCode(e.target.value)} />
               </div>
+              <label className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <input type="checkbox" checked={useProxy} onChange={e => setUseProxy(e.target.checked)} />
+                Use proxy rotation (avoid rate limit)
+              </label>
               <Button size="sm" onClick={register} disabled={running} className="w-full">
                 <Zap className={`h-4 w-4 mr-1.5 ${running ? 'animate-spin' : ''}`} />
                 {running ? 'Registering...' : `Register ${count} accounts`}
