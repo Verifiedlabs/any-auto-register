@@ -11,25 +11,23 @@ BASE_URL = "https://ccode.scydao.com/api/v1"
 DEFAULT_AFF_CODE = "3GLRG6XG8VQE"
 
 
-def _gmail_trick(base: str) -> str:
-    chars = list(base)
-    positions = random.sample(range(1, len(chars)), random.randint(1, min(4, len(chars) - 1)))
-    for pos in sorted(positions, reverse=True):
-        chars.insert(pos, '.')
-    return ''.join(chars) + '@gmail.com'
+def _random_email() -> str:
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    name = ''.join(random.choice(chars) for _ in range(8))
+    return f"{name}@gmail.com"
 
 
 def _gen_password() -> str:
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=12)) + '!A1'
+    return "qwerty77"
 
 
 def register_ccode(
-    gmail_base: str,
+    email: Optional[str] = None,
     password: Optional[str] = None,
     aff_code: str = DEFAULT_AFF_CODE,
     proxy: Optional[str] = None,
 ) -> dict:
-    email = _gmail_trick(gmail_base)
+    email = email or _random_email()
     pwd = password or _gen_password()
 
     session = requests.Session()
@@ -40,8 +38,8 @@ def register_ccode(
         resp = session.post(f"{BASE_URL}/auth/register", json={
             "email": email,
             "password": pwd,
-            "invitation_code": aff_code,
-        }, timeout=15)
+            "aff_code": aff_code,
+        }, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
         data = resp.json()
     except Exception as e:
         return {"ok": False, "error": str(e), "email": email}
@@ -53,7 +51,7 @@ def register_ccode(
     user = data["data"]["user"]
 
     try:
-        key_resp = session.post(f"{BASE_URL}/keys", json={"name": "auto-key"}, headers={"Authorization": f"Bearer {token}"}, timeout=10)
+        key_resp = session.post(f"{BASE_URL}/keys", json={"name": "auto-key"}, headers={"Authorization": f"Bearer {token}", "User-Agent": "Mozilla/5.0"}, timeout=10)
         key_data = key_resp.json()
         api_key = key_data.get("data", {}).get("key", "")
     except:
@@ -72,10 +70,11 @@ def register_ccode(
 
 
 def bulk_register_ccode(
-    gmail_base: str,
     count: int = 10,
     aff_code: str = DEFAULT_AFF_CODE,
-    delay: float = 3.0,
+    pause_after: int = 5,
+    pause_duration: float = 5.0,
+    delay: float = 1.5,
     use_proxy: bool = False,
 ) -> list[dict]:
     proxies = []
@@ -92,16 +91,13 @@ def bulk_register_ccode(
     results = []
     for i in range(count):
         proxy = proxies[i % len(proxies)] if proxies else None
-        result = register_ccode(gmail_base, aff_code=aff_code, proxy=proxy)
+        result = register_ccode(aff_code=aff_code, proxy=proxy)
         results.append(result)
-        if not result["ok"] and "频繁" in result.get("error", ""):
-            import re
-            wait_match = re.search(r"(\d+)\s*秒", result["error"])
-            wait_time = int(wait_match.group(1)) + 2 if wait_match else 60
-            time.sleep(wait_time)
-            proxy = proxies[(i + 1) % len(proxies)] if proxies else None
-            retry = register_ccode(gmail_base, aff_code=aff_code, proxy=proxy)
-            results[-1] = retry
+
         if delay > 0:
-            time.sleep(delay)
+            time.sleep(delay + random.uniform(0, 1))
+
+        if (i + 1) % pause_after == 0 and (i + 1) < count:
+            time.sleep(pause_duration)
+
     return results

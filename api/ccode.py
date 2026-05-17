@@ -11,19 +11,13 @@ router = APIRouter(prefix="/ccode", tags=["ccode"])
 
 
 class CcodeRegisterRequest(BaseModel):
-    gmail_base: str
-    count: int = 1
+    count: int = 10
     aff_code: str = "3GLRG6XG8VQE"
-    delay: float = 3.0
     use_proxy: bool = False
 
 
 @router.post("/register")
 def ccode_register(req: CcodeRegisterRequest):
-    if req.count == 1:
-        result = register_ccode(req.gmail_base, aff_code=req.aff_code)
-        return {"ok": True, "results": [result], "success": 1 if result["ok"] else 0, "failed": 0 if result["ok"] else 1}
-
-    results = bulk_register_ccode(req.gmail_base, count=min(req.count, 15), aff_code=req.aff_code, delay=max(req.delay, 1.0), use_proxy=req.use_proxy)
+    results = bulk_register_ccode(count=min(req.count, 15), aff_code=req.aff_code, use_proxy=req.use_proxy)
     success = sum(1 for r in results if r["ok"])
     return {"ok": True, "results": results, "success": success, "failed": len(results) - success}

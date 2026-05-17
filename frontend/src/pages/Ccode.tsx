@@ -6,20 +6,18 @@ import { Badge } from '@/components/ui/badge'
 import { Zap, CheckCircle, XCircle, Copy, Key } from 'lucide-react'
 
 export default function Ccode() {
-  const [gmailBase, setGmailBase] = useState('')
-  const [count, setCount] = useState('5')
+  const [count, setCount] = useState('10')
   const [affCode, setAffCode] = useState('3GLRG6XG8VQE')
   const [useProxy, setUseProxy] = useState(true)
   const [running, setRunning] = useState(false)
   const [results, setResults] = useState<any[]>([])
 
   const register = async () => {
-    if (!gmailBase.trim()) return
     setRunning(true)
     try {
       const res = await apiFetch('/ccode/register', {
         method: 'POST',
-        body: JSON.stringify({ gmail_base: gmailBase.trim(), count: parseInt(count) || 5, aff_code: affCode, use_proxy: useProxy }),
+        body: JSON.stringify({ count: parseInt(count) || 10, aff_code: affCode, use_proxy: useProxy }),
       })
       setResults(res.results || [])
     } catch (e: any) {
@@ -67,11 +65,9 @@ export default function Ccode() {
           <div className="space-y-3">
             <div>
               <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">Register Settings</div>
-              <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Gmail base + count</div>
+              <div className="mt-1 text-sm font-medium text-[var(--text-primary)]">Random email + auto API key</div>
             </div>
             <div className="space-y-2">
-              <input className="input w-full" placeholder="Gmail base (without @gmail.com)" value={gmailBase} onChange={e => setGmailBase(e.target.value)} />
-              <div className="text-xs text-[var(--text-muted)]">Gmail trick: dots are ignored. "testuser" → "t.est.us.er@gmail.com"</div>
               <div className="grid grid-cols-2 gap-2">
                 <input className="input" placeholder="Count" value={count} onChange={e => setCount(e.target.value)} />
                 <input className="input" placeholder="Aff code" value={affCode} onChange={e => setAffCode(e.target.value)} />
